@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TRAINING">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#0a0a0b">
+<link rel="apple-touch-icon" href="icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>TRAINING LOG</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* Layout: 1カラムの縦長アプリ。ホーム → 日選択 → 種目 → 保存結果。下部固定の休憩タイマー。黒地に白、罫線だけで区切る。 */
+:root {
+  --bg: #0a0a0b;
+  --surface: #131315;
+  --surface-2: #1b1b1e;
+  --line: #2a2a2e;
+  --fg: #f4f4f2;
+  --mute: #8d8d95;
+  --dim: #5b5b62;
+  --ok: #8fc9a9;
+  --up: #f0c987;
+  --err: #e58b83;
+  --on-fg: #0a0a0b;
+  --f-display: 'Inter', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  --f-body: 'Noto Sans JP', 'Inter', system-ui, -apple-system, 'Hiragino Sans', sans-serif;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.6;
+  padding-block: 20px 170px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+button:disabled { cursor: default; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+h1, h2, h3, p, dl, dd, dt { margin: 0; }
+.wrap { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.eyebrow { font-family: var(--f-display); font-size: 11px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--mute); }
+.mute { color: var(--mute); font-size: 13px; }
+.num { font-family: var(--f-display); font-variant-numeric: tabular-nums; }
+
+/* home */
+.brand { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; }
+.brand h1 { font-family: var(--f-display); font-weight: 300; font-size: 36px; letter-spacing: .06em; line-height: 1.1; }
+.brand .sub { color: var(--mute); font-size: 13px; font-family: var(--f-display); font-variant-numeric: tabular-nums; }
+.lead { font-size: 12px; letter-spacing: .12em; color: var(--mute); }
+.days { display: flex; flex-direction: column; gap: 12px; }
+.daycard { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 20px; width: 100%; padding: 20px; border: 1px solid var(--line); background: var(--surface); border-radius: 4px; }
+.daycard:active { background: var(--surface-2); }
+.letter { font-family: var(--f-display); font-size: 68px; font-weight: 200; line-height: 1; width: 52px; }
+.dc-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.dc-sub { font-size: 16px; font-weight: 500; }
+.dc-meta { font-size: 12px; color: var(--mute); }
+.tag { font-family: var(--f-display); font-size: 10px; letter-spacing: .16em; border: 1px solid var(--fg); padding: 2px 8px; border-radius: 2px; }
+.row { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 14px; }
+.chev { color: var(--mute); font-size: 20px; line-height: 1; }
+.warn { font-size: 12px; color: var(--up); }
+
+/* top bar */
+.topbar { display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
+.back { min-height: 44px; display: inline-flex; align-items: center; color: var(--mute); font-size: 14px; padding-right: 16px; }
+.pos { font-family: var(--f-display); font-size: 12px; letter-spacing: .12em; color: var(--mute); font-variant-numeric: tabular-nums; }
+.title { font-family: var(--f-display); font-weight: 300; font-size: 30px; line-height: 1.2; letter-spacing: .02em; }
+.progress { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--mute); }
+.progress .bar { flex: 1; height: 2px; background: var(--line); }
+.progress .bar i { display: block; height: 100%; background: var(--fg); }
+
+/* day list */
+.exlist { display: flex; flex-direction: column; }
+.ex { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 8px; width: 100%; padding: 16px 0; border-top: 1px solid var(--line); min-width: 0; }
+.exlist .ex:last-child { border-bottom: 1px solid var(--line); }
+.ex .no { font-family: var(--f-display); font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.ex-b { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ex-n { font-size: 16px; font-weight: 500; }
+.ex-m, .ex-l { font-size: 12px; color: var(--mute); }
+.ex-l { color: var(--dim); }
+.ex .st { font-size: 13px; color: var(--mute); min-width: 28px; text-align: right; }
+.ex.ok .st { color: var(--ok); }
+.ex.ok .ex-n { color: var(--mute); }
+
+/* exercise */
+.exname { font-size: 28px; font-weight: 500; line-height: 1.3; }
+.facts { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.facts > div { display: grid; grid-template-columns: 52px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.facts dt { color: var(--mute); font-size: 12px; letter-spacing: .08em; padding-top: 1px; }
+.facts dd { min-width: 0; }
+.goalbox { border: 1px solid var(--line); background: var(--surface); border-radius: 4px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.gb-row { display: grid; grid-template-columns: 56px 1fr; gap: 12px; font-size: 14px; }
+.gb-k { color: var(--mute); font-size: 12px; letter-spacing: .08em; padding-top: 2px; }
+.gb-v { font-family: var(--f-display); font-variant-numeric: tabular-nums; min-width: 0; }
+.gb-row.hi .gb-v { font-weight: 600; }
+.badge { font-size: 12px; color: var(--up); }
+.sets { display: flex; flex-direction: column; gap: 12px; }
+.set { border: 1px solid var(--line); background: var(--surface); border-radius: 4px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.set.done { border-color: var(--ok); }
+.set-h { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.lab { font-family: var(--f-display); font-size: 12px; letter-spacing: .16em; font-weight: 500; }
+.lab i { font-style: normal; color: var(--dim); }
+.chk { min-width: 92px; height: 40px; border: 1px solid var(--fg); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; }
+.set.done .chk { background: var(--ok); border-color: var(--ok); color: var(--on-fg); }
+.set-b { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fld { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.fld label { font-size: 11px; color: var(--mute); letter-spacing: .08em; }
+.stp { display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; align-items: center; }
+.stp button { height: 48px; border: 1px solid var(--line); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; color: var(--mute); }
+.stp button:active { background: var(--surface-2); }
+.stp input { width: 100%; min-width: 0; height: 48px; background: transparent; border: 0; color: var(--fg); text-align: center; font-family: var(--f-display); font-size: 26px; font-weight: 300; font-variant-numeric: tabular-nums; border-radius: 0; -moz-appearance: textfield; appearance: textfield; }
+.stp input::-webkit-outer-spin-button, .stp input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.err { color: var(--err); font-size: 13px; }
+.primary { width: 100%; min-height: 54px; background: var(--fg); color: var(--on-fg); border-radius: 4px; text-align: center; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.primary:disabled { opacity: .3; }
+.ghost { width: 100%; min-height: 50px; border: 1px solid var(--line); border-radius: 4px; text-align: center; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.stepset { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--mute); }
+.stepset input { width: 84px; height: 40px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; color: var(--fg); text-align: center; font-family: var(--f-display); font-size: 16px; }
+.savedlist { display: flex; flex-direction: column; gap: 4px; font-family: var(--f-display); font-variant-numeric: tabular-nums; }
+
+/* log */
+.stats { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.stats > div { display: flex; flex-direction: column; gap: 2px; padding: 14px 0; }
+.stats > div + div { padding-left: 16px; border-left: 1px solid var(--line); }
+.stats b { font-family: var(--f-display); font-weight: 300; font-size: 32px; line-height: 1.1; }
+.stats span { font-size: 12px; color: var(--mute); }
+.day-g { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.day-gh { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--f-display); font-size: 13px; font-variant-numeric: tabular-nums; }
+.day-gh span { color: var(--mute); font-size: 11px; letter-spacing: .14em; }
+.h-it { display: flex; flex-direction: column; gap: 0; font-size: 13px; }
+.h-it b { font-weight: 500; }
+.h-it span { color: var(--mute); font-family: var(--f-display); font-variant-numeric: tabular-nums; }
+.bk { display: flex; flex-direction: column; gap: 12px; }
+.bk h3 { font-size: 16px; font-weight: 500; }
+.btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+textarea { width: 100%; min-height: 96px; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; color: var(--fg); padding: 10px; font-family: var(--f-display); font-size: 12px; resize: vertical; }
+.danger { border-color: var(--err); color: var(--err); }
+
+/* timer */
+.timer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--surface-2); border-top: 1px solid var(--line);
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.tm-in { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.tm-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tm-l { display: flex; align-items: baseline; gap: 12px; }
+.tm-label { font-size: 12px; letter-spacing: .12em; color: var(--mute); }
+.tm-time { font-family: var(--f-display); font-weight: 300; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+.tm-btns { display: flex; gap: 8px; }
+.tm-btns button { height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 4px; font-size: 13px; display: inline-flex; align-items: center; }
+.tm-btns .solid { background: var(--fg); color: var(--on-fg); border-color: var(--fg); font-weight: 700; }
+.tm-bar { height: 2px; background: var(--line); }
+.tm-bar i { display: block; height: 100%; width: 0; background: var(--fg); }
+.timer.end .tm-time, .timer.end .tm-label { color: var(--up); }
+.timer.end .tm-bar i { background: var(--up); }
+@media (prefers-reduced-motion: no-preference) { .tm-bar i { transition: width .25s linear; } }
+</style>
+
+</head>
+<body>
+<div id="app"></div>
+
+<div id="timer" class="timer" hidden>
+  <div class="tm-in">
+    <div class="tm-row">
+      <div class="tm-l"><span class="tm-label" id="tmLabel">休憩</span><span class="tm-time" id="tmTime">0:00</span></div>
+      <div class="tm-btns">
+        <button type="button" data-t="-15">−15</button>
+        <button type="button" data-t="15">+15</button>
+        <button type="button" data-t="skip" class="solid">スキップ</button>
+      </div>
+    </div>
+    <div class="tm-bar"><i id="tmBar"></i></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var KEY = 'trainingLog.v1';
+  var WD = ['日', '月', '火', '水', '木', '金', '土'];
+
+  var MENU = {
+    A: { label: 'A DAY', sub: '胸・肩・三頭・脚', ex: [
+      { id: 'a1', name: 'インクラインDBプレス', sets: 3, min: 8, max: 12, rest: 120, aim: '大胸筋上部', alt: 'インクラインマシンプレス', step: 2 },
+      { id: 'a2', name: 'ディップス', sets: 2, min: 8, max: 12, rest: 120, aim: '大胸筋下部・三頭筋', alt: 'チェストプレス', step: 2.5, bw: true },
+      { id: 'a3', name: 'ペックデック', sets: 2, min: 10, max: 15, rest: 60, aim: '大胸筋全体', alt: 'ケーブルフライ', step: 2.5 },
+      { id: 'a4', name: 'サイドレイズ', sets: 3, min: 12, max: 20, rest: 60, aim: '三角筋中部', alt: 'ケーブルサイドレイズ', step: 1 },
+      { id: 'a5', name: 'DBショルダープレス', sets: 2, min: 8, max: 12, rest: 90, aim: '三角筋前部・中部', alt: 'ショルダープレスマシン', step: 2 },
+      { id: 'a6', name: 'EZバーフレンチプレス', sets: 2, min: 10, max: 12, rest: 60, aim: '三頭筋長頭', alt: 'ケーブルOHエクステンション', step: 2.5 },
+      { id: 'a7', name: 'ローププレスダウン', sets: 2, min: 10, max: 15, rest: 60, aim: '三頭筋外側頭を含む全体', alt: 'Vバープレスダウン', step: 2.5 },
+      { id: 'a8', name: 'レッグプレス', sets: 2, min: 10, max: 15, rest: 90, aim: '大腿四頭筋・臀筋', alt: 'レッグエクステンション', step: 5 },
+      { id: 'a9', name: 'シーテッドカーフレイズ', sets: 2, min: 12, max: 20, rest: 60, aim: 'ヒラメ筋', alt: 'レッグプレスカーフレイズ', step: 2.5 }
+    ] },
+    B: { label: 'B DAY', sub: '背中・肩後部・二頭・脚', ex: [
+      { id: 'b1', name: '懸垂', sets: 2, min: 6, max: 10, rest: 120, aim: '広背筋・大円筋', alt: 'アシスト懸垂', step: 2.5, bw: true },
+      { id: 'b2', name: 'シーテッドロー', sets: 3, min: 8, max: 12, rest: 120, aim: '広背筋・僧帽筋中部・菱形筋', alt: 'マシンロー／DBロー', step: 2.5 },
+      { id: 'b3', name: 'ラットプルダウン', sets: 2, min: 10, max: 12, rest: 90, aim: '広背筋', alt: '片手ケーブルプルダウン', step: 2.5 },
+      { id: 'b4', name: 'フェイスプル', sets: 2, min: 12, max: 20, rest: 60, aim: '三角筋後部・僧帽筋中下部', alt: 'リアデルトフライ', step: 2.5 },
+      { id: 'b5', name: 'インクラインDBカール', sets: 2, min: 10, max: 12, rest: 60, aim: '上腕二頭筋', alt: 'プリーチャーカール', step: 1 },
+      { id: 'b6', name: 'ハンマーカール', sets: 2, min: 10, max: 15, rest: 60, aim: '腕筋・腕橈骨筋', alt: 'ロープハンマーカール', step: 1 },
+      { id: 'b7', name: 'シーテッドレッグカール', sets: 2, min: 10, max: 15, rest: 60, aim: 'ハムストリングス', alt: 'ライイングレッグカール', step: 2.5 },
+      { id: 'b8', name: 'シーテッドカーフレイズ', sets: 2, min: 12, max: 20, rest: 60, aim: 'ヒラメ筋', alt: 'レッグプレスカーフレイズ', step: 2.5 }
+    ] }
+  };
+
+  /* ---------- storage ---------- */
+  var storageOK = true;
+  function blank() { return { v: 1, last: {}, hist: [], steps: {}, draft: {} }; }
+  function load() {
+    var s = blank();
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) { s = sanitize(JSON.parse(raw)); }
+      localStorage.setItem(KEY + '.probe', '1');
+      localStorage.removeItem(KEY + '.probe');
+    } catch (e) { storageOK = false; }
+    return s;
+  }
+  function sanitize(o) {
+    var s = blank();
+    if (o && typeof o === 'object') {
+      if (o.last && typeof o.last === 'object') s.last = o.last;
+      if (Array.isArray(o.hist)) s.hist = o.hist;
+      if (o.steps && typeof o.steps === 'object') s.steps = o.steps;
+      if (o.draft && typeof o.draft === 'object') s.draft = o.draft;
+    }
+    return s;
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { storageOK = false; }
+  }
+
+  var S = load();
+  var V = { name: 'home' };
+  var cur = null;
+  var DL = null;
+
+  /* ---------- helpers ---------- */
+  function el(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function dateLabel(s) {
+    var d = new Date(s + 'T00:00:00');
+    return s + ' (' + WD[d.getDay()] + ')';
+  }
+  function nfmt(w) { return String(Math.round(Number(w) * 100) / 100); }
+  function wl(w, ex) {
+    w = Number(w) || 0;
+    if (ex && ex.bw) return w > 0 ? '+' + nfmt(w) + 'kg' : '自重';
+    return nfmt(w) + 'kg';
+  }
+  function sum(sets, ex) {
+    return sets.map(function (s) { return wl(s.w, ex) + ' × ' + s.r; }).join(' · ');
+  }
+  function findEx(id) {
+    var out = null;
+    ['A', 'B'].forEach(function (d) {
+      MENU[d].ex.forEach(function (e) { if (e.id === id) out = e; });
+    });
+    return out;
+  }
+  function stepOf(ex) { return S.steps[ex.id] > 0 ? S.steps[ex.id] : ex.step; }
+  function r2(x) { return Math.round(x * 100) / 100; }
+
+  function lastDate(day) {
+    var m = '';
+    S.hist.forEach(function (h) { if (h.day === day && h.date > m) m = h.date; });
+    return m;
+  }
+  function nextDay() {
+    var best = null;
+    S.hist.forEach(function (h) { if (!best || h.ts > best.ts) best = h; });
+    if (!best) return 'A';
+    return best.day === 'A' ? 'B' : 'A';
+  }
+  function doneToday() {
+    var o = {}, t = today();
+    S.hist.forEach(function (h) { if (h.date === t) o[h.id] = 1; });
+    return o;
+  }
+
+  /* ---------- double progression ---------- */
+  function computeTarget(ex) {
+    var last = S.last[ex.id];
+    if (!last || !last.sets || !last.sets.length) {
+      return { first: true, up: false, sets: Array.from({ length: ex.sets }, function () { return { w: ex.bw ? 0 : null, r: ex.min }; }) };
+    }
+    var all = last.sets.every(function (s) { return Number(s.r) >= ex.max; });
+    var sets = Array.from({ length: ex.sets }, function (_, i) {
+      var s = last.sets[Math.min(i, last.sets.length - 1)];
+      if (all) return { w: r2(Number(s.w) + stepOf(ex)), r: ex.min };
+      return { w: Number(s.w), r: Math.min(ex.max, Number(s.r) + 1) };
+    });
+    return { first: false, up: all, sets: sets };
+  }
+
+  /* ---------- timer ---------- */
+  var T = null, tInt = null, tHide = null, AC = null, wl_lock = null;
+  function ensureAudio() {
+    try {
+      if (!AC) { var C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+      if (AC && AC.state === 'suspended') AC.resume();
+    } catch (e) {}
+  }
+  function beep() {
+    try {
+      if (AC) {
+        [0, 0.25, 0.5].forEach(function (d, k) {
+          var o = AC.createOscillator(), g = AC.createGain(), t0 = AC.currentTime + d;
+          o.type = 'sine';
+          o.frequency.value = k === 2 ? 1175 : 880;
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+          o.connect(g); g.connect(AC.destination);
+          o.start(t0); o.stop(t0 + 0.2);
+        });
+      }
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    } catch (e) {}
+  }
+  function fmtT(ms) {
+    var s = Math.ceil(ms / 1000), m = Math.floor(s / 60);
+    return m + ':' + ('0' + (s % 60)).slice(-2);
+  }
+  function startTimer(sec) {
+    clearTimeout(tHide);
+    T = { end: Date.now() + sec * 1000, total: sec * 1000, done: false };
+    if (!tInt) tInt = setInterval(tick, 250);
+    tick();
+  }
+  function stopTimer() {
+    T = null;
+    clearTimeout(tHide);
+    if (tInt) { clearInterval(tInt); tInt = null; }
+    el('timer').hidden = true;
+    el('timer').classList.remove('end');
+  }
+  function tick() {
+    if (!T) return;
+    var rem = Math.max(0, T.end - Date.now()), box = el('timer');
+    box.hidden = false;
+    el('tmTime').textContent = fmtT(rem);
+    el('tmBar').style.width = (T.total > 0 ? Math.min(100, 100 * (1 - rem / T.total)) : 100) + '%';
+    if (rem === 0) {
+      if (!T.done) {
+        T.done = true;
+        beep();
+        box.classList.add('end');
+        el('tmLabel').textContent = '休憩終了';
+        tHide = setTimeout(stopTimer, 15000);
+      }
+    } else {
+      box.classList.remove('end');
+      el('tmLabel').textContent = '休憩';
+    }
+  }
+  function adjustTimer(ms) {
+    if (!T) return;
+    clearTimeout(tHide);
+    T.end += ms;
+    T.total = Math.max(1000, T.total + ms);
+    T.done = false;
+    tick();
+  }
+  function wake() {
+    try {
+      if (navigator.wakeLock && document.visibilityState === 'visible') {
+        navigator.wakeLock.request('screen').then(function (l) { wl_lock = l; }).catch(function () {});
+      }
+    } catch (e) {}
+  }
+
+  /* ---------- views ---------- */
+  function viewHome() {
+    var nd = nextDay(), t = today();
+    var h = '<div class="wrap"><header class="brand"><div class="eyebrow">Personal Workout System</div>' +
+      '<h1>TRAINING LOG</h1><div class="sub">' + esc(dateLabel(t)) + '</div></header>' +
+      '<p class="lead">トレーニング日を選択</p><div class="days">';
+    ['A', 'B'].forEach(function (d) {
+      var m = MENU[d], ld = lastDate(d);
+      h += '<button type="button" class="daycard" data-act="day" data-d="' + d + '">' +
+        '<span class="letter">' + d + '</span>' +
+        '<span class="dc-body"><span class="dc-sub">' + esc(m.sub) + '</span>' +
+        '<span class="dc-meta">' + m.ex.length + '種目 · ' + (ld ? '前回 ' + esc(ld) : '未実施') + '</span></span>' +
+        (nd === d ? '<span class="tag">NEXT</span>' : '<span></span>') + '</button>';
+    });
+    h += '</div><button type="button" class="row" data-act="log"><span>履歴・バックアップ</span><span class="chev">›</span></button>';
+    if (!storageOK) {
+      h += '<p class="warn">この環境では端末への保存が使えません。記録は画面を閉じると消えます。履歴画面のコピーで控えを取ってください。</p>';
+    }
+    return h + '</div>';
+  }
+
+  function viewDay() {
+    var m = MENU[V.day], dn = doneToday(), t = today();
+    var n = m.ex.filter(function (e) { return dn[e.id]; }).length;
+    var h = '<div class="wrap"><div class="topbar"><button type="button" class="back" data-act="back">‹ ホーム</button></div>' +
+      '<div><div class="eyebrow">' + m.label + '</div><h2 class="title">' + esc(m.sub) + '</h2></div>' +
+      '<div class="progress"><span class="num">' + n + ' / ' + m.ex.length + '</span><div class="bar"><i style="width:' + (100 * n / m.ex.length) + '%"></i></div></div>' +
+      '<div class="exlist">';
+    m.ex.forEach(function (e, i) {
+      var last = S.last[e.id], dr = S.draft[e.id];
+      var st = dn[e.id] ? '✓' : (dr && dr.date === t ? '途中' : '›');
+      h += '<button type="button" class="ex' + (dn[e.id] ? ' ok' : '') + '" data-act="ex" data-i="' + i + '">' +
+        '<span class="no">' + pad(i + 1) + '</span><span class="ex-b"><span class="ex-n">' + esc(e.name) + '</span>' +
+        '<span class="ex-m">' + e.sets + 'セット · ' + e.min + '–' + e.max + '回 · 休憩' + e.rest + '秒</span>' +
+        '<span class="ex-l">' + (last ? '前回 ' + esc(sum(last.sets, e)) : '前回の記録なし') + '</span></span>' +
+        '<span class="st">' + st + '</span></button>';
+    });
+    return h + '</div></div>';
+  }
+
+  function viewEx() {
+    var ex = cur.ex, m = MENU[cur.day];
+    if (cur.saved) return viewSaved();
+    var t = computeTarget(ex), last = S.last[ex.id];
+    var h = '<div class="wrap"><div class="topbar"><button type="button" class="back" data-act="back">‹ ' + m.label + '</button>' +
+      '<span class="pos">' + pad(cur.i + 1) + ' / ' + pad(m.ex.length) + '</span></div>' +
+      '<div><div class="eyebrow">' + m.label + ' / ' + pad(cur.i + 1) + '</div><h2 class="exname">' + esc(ex.name) + '</h2></div>' +
+      '<dl class="facts"><div><dt>狙い</dt><dd>' + esc(ex.aim) + '</dd></div>' +
+      '<div><dt>代替</dt><dd>' + esc(ex.alt) + '</dd></div>' +
+      '<div><dt>目安</dt><dd>' + ex.sets + 'セット × ' + ex.min + '–' + ex.max + '回 / 休憩' + ex.rest + '秒</dd></div></dl>';
+
+    h += '<div class="goalbox"><div class="gb-row"><span class="gb-k">前回</span><span class="gb-v">' +
+      (last ? esc(sum(last.sets, ex)) + '<br><span class="mute">' + esc(last.date) + '</span>' : '記録なし') + '</span></div>' +
+      '<div class="gb-row hi"><span class="gb-k">目標</span><span class="gb-v">' +
+      (t.first ? ex.sets + 'セット × ' + ex.min + '回' : esc(sum(t.sets, ex))) + '</span></div>';
+    if (t.first) {
+      h += '<p class="badge">初回です。使用重量を入力して始めます。</p>';
+    } else if (t.up) {
+      h += '<p class="badge">全セットで上限' + ex.max + '回を達成。重量アップ(' + esc(wl(last.sets[0].w, ex)) + ' → ' + esc(wl(t.sets[0].w, ex)) + ')。</p>';
+    } else {
+      h += '<p class="mute">重量は維持して、各セット前回より1回増(上限' + ex.max + '回)。</p>';
+    }
+    h += '</div><div class="sets">';
+
+    var step = stepOf(ex), wlabel = ex.bw ? '加重 kg(0 = 自重)' : '重量 kg';
+    cur.sets.forEach(function (s, i) {
+      h += '<div class="set' + (s.done ? ' done' : '') + '">' +
+        '<div class="set-h"><span class="lab">SET ' + (i + 1) + ' <i>/ ' + cur.sets.length + '</i></span>' +
+        '<button type="button" class="chk" data-act="done" data-i="' + i + '">' + (s.done ? '✓ 完了' : '完了') + '</button></div>' +
+        '<div class="set-b">' +
+        '<div class="fld"><label for="w' + i + '">' + wlabel + '</label><div class="stp">' +
+        '<button type="button" data-act="wm" data-i="' + i + '" aria-label="重量を減らす">−</button>' +
+        '<input id="w' + i + '" type="number" inputmode="decimal" step="any" min="0" data-in="w" data-i="' + i + '" value="' + esc(s.w) + '">' +
+        '<button type="button" data-act="wp" data-i="' + i + '" aria-label="重量を増やす">+</button></div></div>' +
+        '<div class="fld"><label for="r' + i + '">回数</label><div class="stp">' +
+        '<button type="button" data-act="rm" data-i="' + i + '" aria-label="回数を減らす">−</button>' +
+        '<input id="r' + i + '" type="number" inputmode="numeric" step="1" min="0" data-in="r" data-i="' + i + '" value="' + esc(s.r) + '">' +
+        '<button type="button" data-act="rp" data-i="' + i + '" aria-label="回数を増やす">+</button></div></div>' +
+        '</div></div>';
+    });
+    h += '</div>';
+    if (cur.err) h += '<p class="err" role="alert">' + esc(cur.err) + '</p>';
+    var any = cur.sets.some(function (s) { return s.done; });
+    h += '<div><button type="button" class="primary" data-act="save"' + (any ? '' : ' disabled') + '>記録を保存</button>' +
+      '<p class="mute" style="margin-top:8px">完了にしたセットだけが保存されます。</p></div>' +
+      '<div class="stepset"><label for="stepIn">重量アップ時の増加幅 kg</label><input id="stepIn" type="number" inputmode="decimal" step="any" min="0" value="' + esc(step) + '"></div>' +
+      '</div>';
+    return h;
+  }
+
+  function viewSaved() {
+    var ex = cur.ex, m = MENU[cur.day], t = computeTarget(ex), last = S.last[ex.id];
+    var hasNext = cur.i + 1 < m.ex.length;
+    var h = '<div class="wrap"><div class="topbar"><span class="pos">' + m.label + ' / ' + pad(cur.i + 1) + '</span></div>' +
+      '<div><div class="eyebrow">Saved</div><h2 class="title">保存しました</h2><p class="mute" style="margin-top:6px">' + esc(ex.name) + '</p></div>' +
+      '<div class="goalbox"><div class="gb-row"><span class="gb-k">今回</span><span class="gb-v">' + esc(sum(last.sets, ex)) + '</span></div>' +
+      '<div class="gb-row hi"><span class="gb-k">次回</span><span class="gb-v">' + esc(sum(t.sets, ex)) + '</span></div>' +
+      (t.up ? '<p class="badge">全セットで上限' + ex.max + '回を達成。次回は重量アップ。</p>' : '<p class="mute">次回は重量を維持して回数を伸ばします。</p>') +
+      '</div>';
+    if (hasNext) h += '<button type="button" class="primary" data-act="next">次の種目へ(' + esc(m.ex[cur.i + 1].name) + ')</button>';
+    h += '<button type="button" class="ghost" data-act="list">種目一覧へ</button></div>';
+    return h;
+  }
+
+  function viewLog() {
+    var days = {}, order = [];
+    S.hist.forEach(function (x) {
+      if (!days[x.date]) { days[x.date] = []; order.push(x.date); }
+      days[x.date].push(x);
+    });
+    order.sort().reverse();
+    var d0 = new Date(), dow = (d0.getDay() + 6) % 7;
+    d0.setDate(d0.getDate() - dow);
+    var weekStart = d0.getFullYear() + '-' + pad(d0.getMonth() + 1) + '-' + pad(d0.getDate());
+    var weekN = order.filter(function (d) { return d >= weekStart; }).length;
+
+    var h = '<div class="wrap"><div class="topbar"><button type="button" class="back" data-act="back">‹ ホーム</button></div>' +
+      '<div><div class="eyebrow">History</div><h2 class="title">履歴</h2></div>' +
+      '<div class="stats"><div><b>' + order.length + '</b><span>トレーニング日数</span></div><div><b>' + weekN + '</b><span>今週(月曜起点)</span></div></div>';
+
+    if (!order.length) h += '<p class="mute">まだ記録がありません。種目を保存すると、ここに並びます。</p>';
+    order.slice(0, 40).forEach(function (d) {
+      var items = days[d].slice().sort(function (a, b) { return a.ts - b.ts; });
+      var dayLabel = MENU[items[0].day] ? MENU[items[0].day].label : '';
+      h += '<div class="day-g"><div class="day-gh"><b>' + esc(dateLabel(d)) + '</b><span>' + esc(dayLabel) + '</span></div>';
+      items.forEach(function (x) {
+        var ex = findEx(x.id);
+        h += '<div class="h-it"><b>' + esc(x.name) + '</b><span>' + esc(sum(x.sets, ex)) + '</span></div>';
+      });
+      h += '</div>';
+    });
+
+    h += '<section class="bk"><h3>バックアップ</h3>' +
+      '<p class="mute">記録はこの端末のブラウザ内に保存されます。ブラウザのデータを消すと失われるため、定期的に書き出してください。</p>' +
+      '<div class="btns">' + (DL ? '<button type="button" class="ghost" data-act="dl">ファイルに保存</button>' : '') +
+      '<button type="button" class="ghost" data-act="copy">コピー</button></div>' +
+      '<label class="mute" for="bk">復元するときは、コピーしたデータをここに貼り付けます。</label>' +
+      '<textarea id="bk" data-in="bk" spellcheck="false">' + esc(V.bk || '') + '</textarea>' +
+      '<div class="btns"><button type="button" class="ghost' + (V.confirm === 'restore' ? ' danger' : '') + '" data-act="restore">' + (V.confirm === 'restore' ? 'もう一度押して上書き' : '貼り付けから復元') + '</button>' +
+      '<button type="button" class="ghost' + (V.confirm === 'wipe' ? ' danger' : '') + '" data-act="wipe">' + (V.confirm === 'wipe' ? 'もう一度押して全消去' : '全データを消去') + '</button></div>' +
+      (V.msg ? '<p class="mute" role="status">' + esc(V.msg) + '</p>' : '') + '</section></div>';
+    return h;
+  }
+
+  var app = el('app');
+  function render(keep) {
+    var y = keep ? window.scrollY : 0;
+    app.innerHTML = V.name === 'home' ? viewHome() : V.name === 'day' ? viewDay() : V.name === 'ex' ? viewEx() : viewLog();
+    window.scrollTo(0, y);
+  }
+
+  /* ---------- exercise state ---------- */
+  function openEx(day, i) {
+    var ex = MENU[day].ex[i], t = computeTarget(ex), dr = S.draft[ex.id], sets;
+    if (dr && dr.date === today() && dr.sets && dr.sets.length) {
+      sets = dr.sets;
+    } else {
+      sets = t.sets.map(function (s) { return { w: s.w == null ? '' : s.w, r: s.r, done: false }; });
+    }
+    cur = { day: day, i: i, ex: ex, sets: sets, saved: false, err: '' };
+    V = { name: 'ex', day: day, i: i };
+    wake();
+    render(false);
+  }
+  function persistDraft() {
+    if (!cur) return;
+    S.draft[cur.ex.id] = { date: today(), sets: cur.sets };
+    save();
+  }
+  function setWeight(i, val) {
+    cur.sets[i].w = val;
+    for (var j = i + 1; j < cur.sets.length; j++) {
+      if (!cur.sets[j].done) cur.sets[j].w = val;
+    }
+  }
+  function toggleDone(i) {
+    var s = cur.sets[i];
+    if (!s.done) {
+      if (s.w === '' || s.w == null || isNaN(Number(s.w))) { cur.err = 'SET ' + (i + 1) + ' の重量を入力してください。'; render(true); return; }
+      if (!(Number(s.r) > 0)) { cur.err = 'SET ' + (i + 1) + ' の回数を入力してください。'; render(true); return; }
+      s.done = true;
+      cur.err = '';
+      var rest = cur.sets.some(function (x) { return !x.done; });
+      if (rest) startTimer(cur.ex.rest); else stopTimer();
+    } else {
+      s.done = false;
+    }
+    persistDraft();
+    render(true);
+  }
+  function saveEx() {
+    var done = cur.sets.filter(function (s) { return s.done; }).map(function (s) { return { w: Number(s.w), r: Number(s.r) }; });
+    if (!done.length) return;
+    var d = today(), ex = cur.ex;
+    S.last[ex.id] = { date: d, sets: done };
+    S.hist = S.hist.filter(function (h) { return !(h.date === d && h.id === ex.id); });
+    S.hist.push({ date: d, ts: Date.now(), day: cur.day, id: ex.id, name: ex.name, sets: done });
+    delete S.draft[ex.id];
+    save();
+    stopTimer();
+    cur.saved = true;
+    render(false);
+  }
+
+  /* ---------- events ---------- */
+  var H = {
+    day: function (b) { V = { name: 'day', day: b.dataset.d }; render(false); },
+    ex: function (b) { openEx(V.day, Number(b.dataset.i)); },
+    back: function () {
+      if (V.name === 'ex') { V = { name: 'day', day: cur.day }; }
+      else { V = { name: 'home' }; }
+      render(false);
+    },
+    log: function () { V = { name: 'log', msg: '', bk: '', confirm: '' }; render(false); },
+    wm: function (b) { stepW(Number(b.dataset.i), -1); },
+    wp: function (b) { stepW(Number(b.dataset.i), 1); },
+    rm: function (b) { stepR(Number(b.dataset.i), -1); },
+    rp: function (b) { stepR(Number(b.dataset.i), 1); },
+    done: function (b) { toggleDone(Number(b.dataset.i)); },
+    save: function () { saveEx(); },
+    next: function () { openEx(cur.day, cur.i + 1); },
+    list: function () { V = { name: 'day', day: cur.day }; render(false); },
+    dl: function () {
+      if (!DL) return;
+      DL.save({ filename: 'training-log-' + today() + '.json', data: JSON.stringify(S, null, 2) }).then(function () {
+        V.msg = 'ファイルに保存しました。'; render(true);
+      }).catch(function (e) {
+        V.msg = e && e.code === 'declined' ? '保存をキャンセルしました。' : 'この環境ではファイル保存が使えません。コピーを使ってください。';
+        render(true);
+      });
+    },
+    copy: function () {
+      var json = JSON.stringify(S);
+      V.bk = json; V.confirm = ''; V.msg = '下の欄にデータを出しました。コピーしてメモなどに保管してください。';
+      render(true);
+      try {
+        navigator.clipboard.writeText(json).then(function () {
+          V.msg = 'クリップボードにコピーしました。メモなどに貼り付けて保管してください。'; render(true);
+        }).catch(function () { selectBk(); });
+      } catch (e) { selectBk(); }
+    },
+    restore: function () {
+      if (V.confirm !== 'restore') { V.confirm = 'restore'; V.msg = ''; render(true); return; }
+      try {
+        var o = JSON.parse((V.bk || '').trim());
+        if (!o || !Array.isArray(o.hist) || !o.last || typeof o.last !== 'object') throw new Error('bad');
+        S = sanitize(o); save(); cur = null;
+        V.msg = '復元しました。履歴 ' + S.hist.length + ' 件。';
+      } catch (e) { V.msg = 'データを読み取れませんでした。コピーしたデータ全体を貼り付けてください。'; }
+      V.confirm = ''; render(true);
+    },
+    wipe: function () {
+      if (V.confirm !== 'wipe') { V.confirm = 'wipe'; V.msg = ''; render(true); return; }
+      S = blank(); save(); cur = null; stopTimer();
+      V.confirm = ''; V.bk = ''; V.msg = '全データを消去しました。'; render(true);
+    }
+  };
+  function selectBk() {
+    var t = el('bk');
+    if (t) { t.focus(); t.select(); }
+  }
+  function stepW(i, dir) {
+    var v = Math.max(0, r2((Number(cur.sets[i].w) || 0) + dir * stepOf(cur.ex)));
+    setWeight(i, v); persistDraft(); render(true);
+  }
+  function stepR(i, dir) {
+    cur.sets[i].r = Math.max(0, (Number(cur.sets[i].r) || 0) + dir);
+    persistDraft(); render(true);
+  }
+
+  app.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!b || b.disabled) return;
+    ensureAudio();
+    var fn = H[b.dataset.act];
+    if (fn) fn(b);
+  });
+  app.addEventListener('input', function (e) {
+    var t = e.target;
+    if (!t.dataset || !t.dataset.in) return;
+    if (t.dataset.in === 'bk') { V.bk = t.value; return; }
+    if (!cur) return;
+    var i = Number(t.dataset.i), v = t.value === '' ? '' : parseFloat(t.value);
+    if (v !== '' && isNaN(v)) v = '';
+    if (t.dataset.in === 'w') {
+      setWeight(i, v);
+      for (var j = i + 1; j < cur.sets.length; j++) {
+        if (!cur.sets[j].done) { var f = el('w' + j); if (f) f.value = v; }
+      }
+    } else {
+      cur.sets[i].r = v;
+    }
+    persistDraft();
+  });
+  app.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.id === 'stepIn' && cur) {
+      var v = parseFloat(t.value);
+      if (v > 0) { S.steps[cur.ex.id] = v; save(); }
+    }
+  });
+  el('timer').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-t]') : null;
+    if (!b) return;
+    ensureAudio();
+    var k = b.dataset.t;
+    if (k === 'skip') stopTimer();
+    else adjustTimer(Number(k) * 1000);
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') { tick(); if (V.name === 'ex') wake(); }
+  });
+
+  /* ---------- start ---------- */
+  render(false);
+  try {
+    if (window.claude && typeof window.claude.use === 'function') {
+      window.claude.use('downloads').then(function (c) {
+        DL = c || null;
+        if (V.name === 'log') render(true);
+      }).catch(function () {});
+    }
+  } catch (e) {}
+
+})();
+</script>
+</body>
+</html>
