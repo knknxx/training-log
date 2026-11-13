@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TRAINING">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#09090b">
+<link rel="apple-touch-icon" href="icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>TRAINING LOG — PRO</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+<style>
+/* 韓国系ミニマルデザイン（黒 × ダークグレー × クールブルー） */
+:root {
+  --bg: #09090b;
+  --surface: #121215;
+  --surface-2: #19191e;
+  --line: #24242b;
+  --fg: #f4f4f6;
+  --mute: #8e8e98;
+  --dim: #52525b;
+  --blue: #3b82f6;
+  --blue-dim: rgba(59, 130, 246, 0.14);
+  --blue-glow: rgba(59, 130, 246, 0.35);
+  --ok: #38bdf8;
+  --up: #60a5fa;
+  --pr: #3b82f6;
+  --err: #f87171;
+  --on-blue: #ffffff;
+  --f-display: 'Inter', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  --f-body: 'Noto Sans JP', 'Inter', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 14px;
+  line-height: 1.55;
+  padding-block: 16px 140px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+button:disabled { cursor: default; opacity: .35; }
+h1, h2, h3, p, dl, dd, dt { margin: 0; }
+.wrap { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.eyebrow { font-family: var(--f-display); font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--blue); }
+.mute { color: var(--mute); font-size: 12px; }
+.num { font-family: var(--f-display); font-variant-numeric: tabular-nums; }
+
+/* Navigation Bottom Bar */
+.nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 15;
+  background: rgba(18, 18, 21, 0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.nav-in { max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.nav-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 48px; border-radius: 8px; color: var(--mute); font-size: 10px; font-weight: 500; transition: color .15s; }
+.nav-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.75; }
+.nav-btn.active { color: var(--blue); background: var(--blue-dim); font-weight: 600; }
+
+/* Header & Cards */
+.brand { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 6px; }
+.brand h1 { font-family: var(--f-display); font-weight: 600; font-size: 26px; letter-spacing: -.02em; line-height: 1.1; }
+.brand .sub { color: var(--mute); font-size: 12px; font-family: var(--f-display); }
+.card { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+/* Day Cards */
+.days { display: flex; flex-direction: column; gap: 10px; }
+.daycard { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 14px; width: 100%; padding: 16px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; transition: border-color .15s, background .15s; }
+.daycard:active { background: var(--surface-2); }
+.daycard.next { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue-dim); }
+.letter { font-family: var(--f-display); font-size: 36px; font-weight: 300; line-height: 1; text-align: center; color: var(--fg); }
+.daycard.next .letter { color: var(--blue); font-weight: 500; }
+.dc-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.dc-sub { font-size: 15px; font-weight: 600; }
+.dc-meta { font-size: 12px; color: var(--mute); }
+.tag { font-family: var(--f-display); font-size: 10px; font-weight: 600; letter-spacing: .12em; background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,.35); padding: 3px 8px; border-radius: 6px; }
+.tag.draft { background: rgba(250, 204, 21, 0.12); color: #facc15; border-color: rgba(250, 204, 21, 0.3); }
+
+/* Dashboard KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.kpi { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 10px; display: flex; flex-direction: column; gap: 4px; }
+.kpi b { font-family: var(--f-display); font-size: 20px; font-weight: 600; line-height: 1.1; color: var(--fg); }
+.kpi b.blue { color: var(--blue); }
+.kpi span { font-size: 11px; color: var(--mute); }
+
+/* Calendar */
+.cal-head { display: flex; justify-content: space-between; align-items: center; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.cal-wd { font-size: 10px; color: var(--mute); padding-bottom: 4px; font-family: var(--f-display); }
+.cal-d { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 8px; font-family: var(--f-display); font-size: 12px; color: var(--mute); position: relative; background: var(--surface-2); }
+.cal-d.empty { background: transparent; }
+.cal-d.today { border: 1px solid var(--blue); color: var(--fg); font-weight: 600; }
+.cal-d.doneA { background: var(--blue); color: #fff; font-weight: 600; }
+.cal-d.doneB { background: #1d4ed8; color: #fff; font-weight: 600; }
+.cal-d.doneBoth { background: linear-gradient(135deg, #3b82f6 50%, #1d4ed8 50%); color: #fff; font-weight: 600; }
+
+/* Muscle Volume Bars */
+.vol-list { display: flex; flex-direction: column; gap: 10px; }
+.vol-item { display: flex; flex-direction: column; gap: 4px; }
+.vol-top { display: flex; justify-content: space-between; font-size: 12px; }
+.vol-bar { height: 6px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+.vol-bar i { display: block; height: 100%; background: var(--blue); border-radius: 99px; transition: width .3s ease; }
+
+/* Top bar & Exercise list */
+.topbar { display: flex; justify-content: space-between; align-items: center; min-height: 40px; }
+.back { min-height: 40px; display: inline-flex; align-items: center; color: var(--mute); font-size: 13px; padding-right: 12px; gap: 4px; }
+.pos { font-family: var(--f-display); font-size: 12px; color: var(--mute); }
+.title { font-family: var(--f-display); font-weight: 600; font-size: 24px; line-height: 1.2; }
+.progress { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--mute); }
+.progress .bar { flex: 1; height: 4px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+.progress .bar i { display: block; height: 100%; background: var(--blue); }
+
+.exlist { display: flex; flex-direction: column; gap: 8px; }
+.ex { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; width: 100%; padding: 14px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; }
+.ex.ok { border-color: rgba(59, 130, 246, 0.35); background: rgba(59, 130, 246, 0.04); }
+.ex .no { font-family: var(--f-display); font-size: 12px; color: var(--dim); }
+.ex-b { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ex-n { font-size: 15px; font-weight: 600; }
+.ex-m { font-size: 11px; color: var(--mute); }
+.ex-l { font-size: 11px; color: var(--blue); font-family: var(--f-display); }
+.ex .st { font-size: 12px; font-weight: 600; color: var(--mute); text-align: right; }
+.ex.ok .st { color: var(--blue); }
+
+/* Exercise Execution */
+.exname { font-size: 22px; font-weight: 700; line-height: 1.3; }
+.meta-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { font-size: 11px; color: var(--mute); background: var(--surface-2); border: 1px solid var(--line); padding: 3px 8px; border-radius: 6px; }
+.goalbox { border: 1px solid rgba(59, 130, 246, 0.35); background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, var(--surface) 100%); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.gb-row { display: grid; grid-template-columns: 54px 1fr; gap: 10px; font-size: 13px; align-items: baseline; }
+.gb-k { color: var(--mute); font-size: 11px; font-weight: 600; }
+.gb-v { font-family: var(--f-display); font-variant-numeric: tabular-nums; }
+.gb-row.hi .gb-v { font-weight: 600; color: var(--fg); font-size: 14px; }
+.badge-blue { font-size: 12px; color: var(--blue); font-weight: 500; }
+
+/* One-tap quick bar */
+.quickbar { display: flex; gap: 6px; flex-wrap: wrap; }
+.qbtn { height: 32px; padding: 0 10px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); font-size: 11px; font-weight: 500; color: var(--fg); display: inline-flex; align-items: center; gap: 4px; }
+.qbtn:active { border-color: var(--blue); color: var(--blue); }
+
+/* Sets */
+.sets { display: flex; flex-direction: column; gap: 10px; }
+.set { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; transition: border-color .15s; }
+.set.done { border-color: var(--blue); background: rgba(59, 130, 246, 0.06); }
+.set-h { display: flex; justify-content: space-between; align-items: center; }
+.lab { font-family: var(--f-display); font-size: 12px; letter-spacing: .12em; font-weight: 600; }
+.lab i { font-style: normal; color: var(--dim); }
+.chk { min-width: 84px; height: 36px; border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+.set.done .chk { background: var(--blue); border-color: var(--blue); color: var(--on-blue); }
+.set-b { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fld { display: flex; flex-direction: column; gap: 4px; }
+.fld label { font-size: 11px; color: var(--mute); }
+.stp { display: grid; grid-template-columns: 36px minmax(0, 1fr) 36px; align-items: center; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.stp button { height: 42px; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; color: var(--mute); }
+.stp button:active { background: var(--line); color: var(--fg); }
+.stp input { width: 100%; min-width: 0; height: 42px; background: transparent; border: 0; color: var(--fg); text-align: center; font-family: var(--f-display); font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; -moz-appearance: textfield; appearance: textfield; }
+.stp input::-webkit-outer-spin-button, .stp input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Memo & Inputs */
+.memo-box { display: flex; flex-direction: column; gap: 6px; }
+textarea, input[type="text"], input[type="number"], input[type="date"] {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; color: var(--fg); font-family: inherit; font-size: 13px; padding: 10px;
+}
+textarea:focus, input:focus { outline: none; border-color: var(--blue); }
+textarea { width: 100%; min-height: 68px; resize: vertical; }
+
+.primary { width: 100%; min-height: 48px; background: var(--blue); color: var(--on-blue); border-radius: 10px; text-align: center; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px var(--blue-glow); }
+.ghost { width: 100%; min-height: 44px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; text-align: center; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+.danger { border-color: rgba(248,113,113,.4); color: var(--err); }
+
+/* PR Celebration Modal / Banner */
+.pr-banner {
+  border: 1px solid var(--blue);
+  background: linear-gradient(135deg, rgba(59,130,246,0.22) 0%, rgba(29,78,216,0.12) 100%);
+  border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px;
+  animation: prPop .45s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 24px var(--blue-glow);
+}
+@keyframes prPop {
+  0% { transform: scale(0.94); opacity: 0; }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pr-title { font-family: var(--f-display); font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--blue); display: flex; align-items: center; gap: 6px; }
+
+/* Body Metrics & Photos */
+.body-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.body-fld { display: flex; flex-direction: column; gap: 4px; }
+.body-fld label { font-size: 11px; color: var(--mute); }
+.body-fld input { width: 100%; text-align: center; font-family: var(--f-display); }
+.photo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.photo-card { border: 1px solid var(--line); background: var(--surface-2); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+.photo-card img { width: 100%; height: 180px; object-fit: cover; display: block; }
+.photo-cap { padding: 8px; font-size: 11px; color: var(--mute); display: flex; justify-content: space-between; }
+
+/* Timer */
+.timer { position: fixed; left: 0; right: 0; bottom: 64px; z-index: 20;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); }
+.tm-in { max-width: 480px; margin: 0 auto; background: #16161c; border: 1px solid var(--blue); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.6); }
+.tm-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tm-l { display: flex; align-items: baseline; gap: 10px; }
+.tm-label { font-size: 11px; font-weight: 600; color: var(--blue); }
+.tm-time { font-family: var(--f-display); font-weight: 600; font-size: 28px; line-height: 1; font-variant-numeric: tabular-nums; }
+.tm-btns { display: flex; gap: 6px; }
+.tm-btns button { height: 32px; padding: 0 10px; border: 1px solid var(--line); background: var(--surface-2); border-radius: 6px; font-size: 12px; }
+.tm-btns .solid { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 600; }
+.tm-bar { height: 3px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+.tm-bar i { display: block; height: 100%; width: 0; background: var(--blue); }
+.timer.end .tm-in { border-color: #38bdf8; }
+.timer.end .tm-time, .timer.end .tm-label { color: #38bdf8; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="timer" class="timer" hidden>
+  <div class="tm-in">
+    <div class="tm-row">
+      <div class="tm-l"><span class="tm-label" id="tmLabel">REST</span><span class="tm-time" id="tmTime">0:00</span></div>
+      <div class="tm-btns">
+        <button type="button" data-t="-15">−15s</button>
+        <button type="button" data-t="15">+15s</button>
+        <button type="button" data-t="skip" class="solid">完了</button>
+      </div>
+    </div>
+    <div class="tm-bar"><i id="tmBar"></i></div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="nav-in">
+    <button type="button" class="nav-btn" data-nav="home" id="nav-home">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>
+      <span>ホーム</span>
+    </button>
+    <button type="button" class="nav-btn" data-nav="dash" id="nav-dash">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 16l4-4 4 4 6-6"/></svg>
+      <span>成長分析</span>
+    </button>
+    <button type="button" class="nav-btn" data-nav="body" id="nav-body">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/></svg>
+      <span>身体記録</span>
+    </button>
+    <button type="button" class="nav-btn" data-nav="log" id="nav-log">
+      <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      <span>履歴・設定</span>
+    </button>
+  </div>
+</nav>
+
+<script>
+(function () {
+  'use strict';
+
+  var KEY = 'trainingLog.pro.v1';
+  var LEGACY_KEY = 'trainingLog.v1';
+  var WD = ['日', '月', '火', '水', '木', '金', '土'];
+
+  var MENU = {
+    A: { label: 'A DAY', sub: '胸・肩・三頭・脚', ex: [
+      { id: 'a1', name: 'インクラインDBプレス', part: '胸', sets: 3, min: 8, max: 12, rest: 120, aim: '大胸筋上部', alt: 'インクラインマシンプレス', step: 2 },
+      { id: 'a2', name: 'ディップス', part: '胸', sets: 2, min: 8, max: 12, rest: 120, aim: '大胸筋下部・三頭筋', alt: 'チェストプレス', step: 2.5, bw: true },
+      { id: 'a3', name: 'ペックデック', part: '胸', sets: 2, min: 10, max: 15, rest: 60, aim: '大胸筋全体', alt: 'ケーブルフライ', step: 2.5 },
+      { id: 'a4', name: 'サイドレイズ', part: '肩', sets: 3, min: 12, max: 20, rest: 60, aim: '三角筋中部', alt: 'ケーブルサイドレイズ', step: 1 },
+      { id: 'a5', name: 'DBショルダープレス', part: '肩', sets: 2, min: 8, max: 12, rest: 90, aim: '三角筋前部・中部', alt: 'ショルダープレスマシン', step: 2 },
+      { id: 'a6', name: 'EZバーフレンチプレス', part: '腕', sets: 2, min: 10, max: 12, rest: 60, aim: '三頭筋長頭', alt: 'ケーブルOHエクステンション', step: 2.5 },
+      { id: 'a7', name: 'ローププレスダウン', part: '腕', sets: 2, min: 10, max: 15, rest: 60, aim: '三頭筋全体', alt: 'Vバープレスダウン', step: 2.5 },
+      { id: 'a8', name: 'レッグプレス', part: '脚', sets: 2, min: 10, max: 15, rest: 90, aim: '大腿四頭筋・臀筋', alt: 'レッグエクステンション', step: 5 },
+      { id: 'a9', name: 'シーテッドカーフレイズ', part: '脚', sets: 2, min: 12, max: 20, rest: 60, aim: 'ヒラメ筋', alt: 'レッグプレスカーフレイズ', step: 2.5 }
+    ] },
+    B: { label: 'B DAY', sub: '背中・肩後部・二頭・脚', ex: [
+      { id: 'b1', name: '懸垂', part: '背中', sets: 2, min: 6, max: 10, rest: 120, aim: '広背筋・大円筋', alt: 'アシスト懸垂', step: 2.5, bw: true },
+      { id: 'b2', name: 'シーテッドロー', part: '背中', sets: 3, min: 8, max: 12, rest: 120, aim: '広背筋・僧帽筋中部', alt: 'マシンロー／DBロー', step: 2.5 },
+      { id: 'b3', name: 'ラットプルダウン', part: '背中', sets: 2, min: 10, max: 12, rest: 90, aim: '広背筋', alt: '片手ケーブルプルダウン', step: 2.5 },
+      { id: 'b4', name: 'フェイスプル', part: '肩', sets: 2, min: 12, max: 20, rest: 60, aim: '三角筋後部', alt: 'リアデルトフライ', step: 2.5 },
+      { id: 'b5', name: 'インクラインDBカール', part: '腕', sets: 2, min: 10, max: 12, rest: 60, aim: '上腕二頭筋', alt: 'プリーチャーカール', step: 1 },
+      { id: 'b6', name: 'ハンマーカール', part: '腕', sets: 2, min: 10, max: 15, rest: 60, aim: '上腕筋・腕橈骨筋', alt: 'ロープハンマーカール', step: 1 },
+      { id: 'b7', name: 'シーテッドレッグカール', part: '脚', sets: 2, min: 10, max: 15, rest: 60, aim: 'ハムストリングス', alt: 'ライイングレッグカール', step: 2.5 },
+      { id: 'b8', name: 'シーテッドカーフレイズ', part: '脚', sets: 2, min: 12, max: 20, rest: 60, aim: 'ヒラメ筋', alt: 'レッグプレスカーフレイズ', step: 2.5 }
+    ] }
+  };
+
+  /* ---------- Storage & Migration ---------- */
+  function blank() {
+    return { v: 2, last: {}, hist: [], steps: {}, draft: {}, memos: {}, body: [], photos: [] };
+  }
+  function load() {
+    var s = blank();
+    try {
+      var raw = localStorage.getItem(KEY) || localStorage.getItem(LEGACY_KEY);
+      if (raw) {
+        var o = JSON.parse(raw);
+        if (o && typeof o === 'object') {
+          if (o.last) s.last = o.last;
+          if (Array.isArray(o.hist)) s.hist = o.hist;
+          if (o.steps) s.steps = o.steps;
+          if (o.draft) s.draft = o.draft;
+          if (o.memos) s.memos = o.memos;
+          if (Array.isArray(o.body)) s.body = o.body;
+          if (Array.isArray(o.photos)) s.photos = o.photos;
+        }
+      }
+    } catch (e) {}
+    return s;
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {
+      alert('保存容量の上限に達しました。古い写真データを削除してください。');
+    }
+  }
+
+  var S = load();
+  var V = { name: 'home', calOffset: 0 };
+  var cur = null;
+
+  /* ---------- Helpers ---------- */
+  function el(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function dateLabel(s) {
+    var d = new Date(s + 'T00:00:00');
+    return s + ' (' + WD[d.getDay()] + ')';
+  }
+  function r2(x) { return Math.round(x * 100) / 100; }
+  function nfmt(w) { return String(r2(Number(w) || 0)); }
+  function wl(w, ex) {
+    w = Number(w) || 0;
+    if (ex && ex.bw) return w > 0 ? '+' + nfmt(w) + 'kg' : '自重';
+    return nfmt(w) + 'kg';
+  }
+  function sum(sets, ex) {
+    return sets.map(function (s) { return wl(s.w, ex) + ' × ' + s.r; }).join(' · ');
+  }
+  function findEx(id) {
+    var out = null;
+    ['A', 'B'].forEach(function (d) {
+      MENU[d].ex.forEach(function (e) { if (e.id === id) out = e; });
+    });
+    return out;
+  }
+  function stepOf(ex) { return S.steps[ex.id] > 0 ? S.steps[ex.id] : ex.step; }
+
+  function lastDate(day) {
+    var m = '';
+    S.hist.forEach(function (h) { if (h.day === day && h.date > m) m = h.date; });
+    return m;
+  }
+  function nextDay() {
+    var best = null;
+    S.hist.forEach(function (h) { if (!best || h.ts > best.ts) best = h; });
+    if (!best) return 'A';
+    return best.day === 'A' ? 'B' : 'A';
+  }
+  function doneToday() {
+    var o = {}, t = today();
+    S.hist.forEach(function (h) { if (h.date === t) o[h.id] = 1; });
+    return o;
+  }
+  function hasActiveDraft() {
+    var t = today();
+    for (var k in S.draft) {
+      if (S.draft[k] && S.draft[k].date === t && S.draft[k].sets && S.draft[k].sets.some(function (x) { return x.done; })) {
+        return k;
+      }
+    }
+    return null;
+  }
+
+  /* ---------- PR & Double Progression ---------- */
+  function getExercisePR(exId) {
+    var maxW = -1, maxR = 0, date = '';
+    S.hist.forEach(function (h) {
+      if (h.id !== exId) return;
+      h.sets.forEach(function (s) {
+        var w = Number(s.w) || 0, r = Number(s.r) || 0;
+        if (w > maxW || (w === maxW && r > maxR)) {
+          maxW = w; maxR = r; date = h.date;
+        }
+      });
+    });
+    return maxW >= 0 ? { w: maxW, r: maxR, date: date } : null;
+  }
+
+  function computeTarget(ex) {
+    var last = S.last[ex.id];
+    if (!last || !last.sets || !last.sets.length) {
+      return { first: true, up: false, sets: Array.from({ length: ex.sets }, function () { return { w: ex.bw ? 0 : null, r: ex.min }; }) };
+    }
+    var all = last.sets.length >= ex.sets && last.sets.every(function (s) { return Number(s.r) >= ex.max; });
+    var sets = Array.from({ length: ex.sets }, function (_, i) {
+      var s = last.sets[Math.min(i, last.sets.length - 1)];
+      if (all) return { w: r2(Number(s.w) + stepOf(ex)), r: ex.min };
+      return { w: Number(s.w), r: Math.min(ex.max, Number(s.r) + 1) };
+    });
+    return { first: false, up: all, sets: sets };
+  }
+
+  /* ---------- Timer ---------- */
+  var T = null, tInt = null, tHide = null, AC = null;
+  function ensureAudio() {
+    try {
+      if (!AC) { var C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+      if (AC && AC.state === 'suspended') AC.resume();
+    } catch (e) {}
+  }
+  function beep() {
+    try {
+      if (AC) {
+        [0, 0.22, 0.44].forEach(function (d, k) {
+          var o = AC.createOscillator(), g = AC.createGain(), t0 = AC.currentTime + d;
+          o.type = 'sine'; o.frequency.value = k === 2 ? 1175 : 880;
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+          o.connect(g); g.connect(AC.destination);
+          o.start(t0); o.stop(t0 + 0.2);
+        });
+      }
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    } catch (e) {}
+  }
+  function fmtT(ms) {
+    var s = Math.ceil(ms / 1000), m = Math.floor(s / 60);
+    return m + ':' + ('0' + (s % 60)).slice(-2);
+  }
+  function startTimer(sec) {
+    clearTimeout(tHide);
+    T = { end: Date.now() + sec * 1000, total: sec * 1000, done: false };
+    if (!tInt) tInt = setInterval(tick, 250);
+    tick();
+  }
+  function stopTimer() {
+    T = null; clearTimeout(tHide);
+    if (tInt) { clearInterval(tInt); tInt = null; }
+    el('timer').hidden = true; el('timer').classList.remove('end');
+  }
+  function tick() {
+    if (!T) return;
+    var rem = Math.max(0, T.end - Date.now()), box = el('timer');
+    box.hidden = false;
+    el('tmTime').textContent = fmtT(rem);
+    el('tmBar').style.width = (T.total > 0 ? Math.min(100, 100 * (1 - rem / T.total)) : 100) + '%';
+    if (rem === 0) {
+      if (!T.done) { T.done = true; beep(); box.classList.add('end'); el('tmLabel').textContent = 'READY'; tHide = setTimeout(stopTimer, 15000); }
+    } else {
+      box.classList.remove('end'); el('tmLabel').textContent = 'REST';
+    }
+  }
+  function adjustTimer(ms) {
+    if (!T) return;
+    clearTimeout(tHide); T.end += ms; T.total = Math.max(1000, T.total + ms); T.done = false; tick();
+  }
+
+  /* ---------- Views ---------- */
+  function viewHome() {
+    var nd = nextDay(), t = today();
+    var draftId = hasActiveDraft();
+    var d0 = new Date(), dow = (d0.getDay() + 6) % 7;
+    d0.setDate(d0.getDate() - dow);
+    var weekStart = d0.getFullYear() + '-' + pad(d0.getMonth() + 1) + '-' + pad(d0.getDate());
+    var weekSets = 0, weekDays = {};
+    S.hist.forEach(function (h) {
+      if (h.date >= weekStart) { weekSets += h.sets.length; weekDays[h.date] = 1; }
+    });
+
+    var h = '<div class="wrap"><header class="brand"><div><div class="eyebrow">WORKOUT SYSTEM</div><h1>TRAINING LOG</h1></div><div class="sub">' + esc(dateLabel(t)) + '</div></header>';
+
+    // 途中保存の復元バナー
+    if (draftId) {
+      var dex = findEx(draftId);
+      if (dex) {
+        h += '<button type="button" class="card" style="border-color:#facc15;background:rgba(250,204,21,0.06)" data-act="resume" data-id="' + draftId + '">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<div><span class="tag draft">途中データあり</span><div style="font-weight:600;margin-top:6px">' + esc(dex.name) + ' を再開する</div></div>' +
+          '<span style="color:#facc15;font-size:18px">→</span></div></button>';
+      }
+    }
+
+    // 今週のクイックサマリー
+    h += '<div class="kpi-grid">' +
+      '<div class="kpi"><b class="blue">' + Object.keys(weekDays).length + '日</b><span>今週の実施</span></div>' +
+      '<div class="kpi"><b>' + weekSets + '</b><span>今週セット数</span></div>' +
+      '<div class="kpi"><b>' + Object.keys(S.last).length + '/16</b><span>記録済種目</span></div>' +
+      '</div>';
+
+    h += '<div class="days">';
+    ['A', 'B'].forEach(function (d) {
+      var m = MENU[d], ld = lastDate(d), isNext = nd === d;
+      h += '<button type="button" class="daycard' + (isNext ? ' next' : '') + '" data-act="day" data-d="' + d + '">' +
+        '<span class="letter">' + d + '</span>' +
+        '<span class="dc-body"><span class="dc-sub">' + esc(m.sub) + '</span>' +
+        '<span class="dc-meta">' + m.ex.length + '種目 · ' + (ld ? '前回 ' + esc(ld) : '未実施') + '</span></span>' +
+        (isNext ? '<span class="tag">NEXT</span>' : '<span></span>') + '</button>';
+    });
+    h += '</div></div>';
+    return h;
+  }
+
+  function viewDay() {
+    var m = MENU[V.day], dn = doneToday(), t = today();
+    var n = m.ex.filter(function (e) { return dn[e.id]; }).length;
+    var h = '<div class="wrap"><div class="topbar"><button type="button" class="back" data-act="back">‹ ホーム</button>' +
+      '<span class="pos">' + n + ' / ' + m.ex.length + ' 完了</span></div>' +
+      '<div><div class="eyebrow">' + m.label + '</div><h2 class="title">' + esc(m.sub) + '</h2></div>' +
+      '<div class="progress"><div class="bar"><i style="width:' + (100 * n / m.ex.length) + '%"></i></div></div>' +
+      '<div class="exlist">';
+    m.ex.forEach(function (e, i) {
+      var last = S.last[e.id], dr = S.draft[e.id];
+      var st = dn[e.id] ? 'DONE' : (dr && dr.date === t ? '途中' : '›');
+      h += '<button type="button" class="ex' + (dn[e.id] ? ' ok' : '') + '" data-act="ex" data-i="' + i + '">' +
+        '<span class="no">' + pad(i + 1) + '</span><span class="ex-b"><span class="ex-n">' + esc(e.name) + '</span>' +
+        '<span class="ex-m">' + e.part + ' · ' + e.sets + 'セット × ' + e.min + '–' + e.max + '回</span>' +
+        '<span class="ex-l">' + (last ? '前回: ' + esc(sum(last.sets, e)) : '初回記録') + '</span></span>' +
+        '<span class="st">' + st + '</span></button>';
+    });
+    return h + '</div></div>';
+  }
+
+  function viewEx() {
+    var ex = cur.ex, m = MENU[cur.day];
+    if (cur.saved) return viewSaved();
+    var t = computeTarget(ex), last = S.last[ex.id], pr = getExercisePR(ex.id);
+    var memo = S.memos[ex.id] || '';
+
+    var h = '<div class="wrap"><div class="topbar"><button type="button" class="back" data-act="back">‹ ' + m.label + '</button>' +
+      '<span class="pos">' + pad(cur.i + 1) + ' / ' + pad(m.ex.length) + '</span></div>' +
+      '<div><div class="eyebrow">' + esc(ex.part) + ' · ' + esc(ex.aim) + '</div><h2 class="exname">' + esc(ex.name) + '</h2></div>' +
+      '<div class="meta-pills"><span class="pill">目標 ' + ex.sets + '×' + ex.min + '–' + ex.max + '回</span>' +
+      '<span class="pill">休憩 ' + ex.rest + '秒</span>' +
+      (pr ? '<span class="pill" style="color:var(--blue);border-color:rgba(59,130,246,.4)">PR ' + esc(wl(pr.w, ex)) + '×' + pr.r + '</span>' : '') +
+      '<span class="pill">代替: ' + esc(ex.alt) + '</span></div>';
+
+    // ダブルプログレッション目標カード
+    h += '<div class="goalbox"><div class="gb-row"><span class="gb-k">前回</span><span class="gb-v">' +
+      (last ? esc(sum(last.sets, ex)) + ' <span class="mute">(' + esc(last.date) + ')</span>' : '記録なし') + '</span></div>' +
+      '<div class="gb-row hi"><span class="gb-k">今回目標</span><span class="gb-v">' +
+      (t.first ? ex.sets + 'セット × ' + ex.min + '回' : esc(sum(t.sets, ex))) + '</span></div>';
+    if (t.first) {
+      h += '<p class="badge-blue">初回です。余裕を持ってフォームを確認できる重量から始めましょう。</p>';
+    } else if (t.up) {
+      h += '<p class="badge-blue">▲ 前回上限達成！重量アップ（' + esc(wl(last.sets[0].w, ex)) + ' → ' + esc(wl(t.sets[0].w, ex)) + '）</p>';
+    } else {
+      h += '<p class="mute">重量を維持し、前回より1回多く挙げることを目指します。</p>';
+    }
+    h += '</div>';
+
+    // ワンタップ入力バー
+    if (last && last.sets && last.sets.length) {
+      h += '<div class="quickbar">' +
+        '<button type="button" class="qbtn" data-act="qLast">⚡ 前回重量を呼び出し</button>' +
+        '<button type="button" class="qbtn" data-act="qAllW" data-d="-1">全セット −' + stepOf(ex) + 'kg</button>' +
+        '<button type="button" class="qbtn" data-act="qAllW" data-d="1">全セット +' + stepOf(ex) + 'kg</button>' +
+        '</div>';
+    }
+
+    // セット入力
+    h += '<div class="sets">';
+    var wlabel = ex.bw ? '加重 kg (0=自重)' : '重量 kg';
+    cur.sets.forEach(function (s, i) {
+      h += '<div class="set' + (s.done ? ' done' : '') + '">' +
+        '<div class="set-h"><span class="lab">SET ' + (i + 1) + ' <i>/ ' + cur.sets.length + '</i></span>' +
+        '<button type="button" class="chk" data-act="done" data-i="' + i + '">' + (s.done ? '✓ 完了' : '完了') + '</button></div>' +
+        '<div class="set-b">' +
+        '<div class="fld"><label>'+ wlabel +'</label><div class="stp">' +
+        '<button type="button" data-act="wm" data-i="' + i + '">−</button>' +
+        '<input type="number" inputmode="decimal" step="any" min="0" data-in="w" data-i="' + i + '" value="' + esc(s.w) + '">' +
+        '<button type="button" data-act="wp" data-i="' + i + '">+</button></div></div>' +
+        '<div class="fld"><label>回数</label><div class="stp">' +
+        '<button type="button" data-act="rm" data-i="' + i + '">−</button>' +
+        '<input type="number" inputmode="numeric" step="1" min="0" data-in="r" data-i="' + i + '" value="' + esc(s.r) + '">' +
+        '<button type="button" data-act="rp" data-i="' + i + '">+</button></div></div>' +
+        '</div></div>';
+    });
+    h += '</div>';
+
+    // 種目別メモ
+    h += '<div class="memo-box"><label class="mute">種目別メモ（シート高さ・フォーム意識・体調など）</label>' +
+      '<textarea data-in="memo" placeholder="例：シート位置4、下ろす時にストレッチ意識">' + esc(memo) + '</textarea></div>';
+
+    if (cur.err) h += '<p style="color:var(--err);font-size:12px">' + esc(cur.err) + '</p>';
+    var any = cur.sets.some(function (s) { return s.done; });
+    h += '<button type="button" class="primary" data-act="save"' + (any ? '' : ' disabled') + '>記録を保存</button>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mute)">' +
+      '<span>増量ステップ幅 (kg)</span>' +
+      '<input id="stepIn" type="number" inputmode="decimal" step="any" min="0" style="width:72px;text-align:center" value="' + esc(stepOf(ex)) + '"></div></div>';
+    return h;
+  }
+
+  function viewSaved() {
+    var ex = cur.ex, m = MENU[cur.day], t = computeTarget(ex), last = S.last[ex.id];
+    var hasNext = cur.i + 1 < m.ex.length;
+    var h = '<div class="wrap"><div class="topbar"><span class="pos">' + m.label + ' / ' + pad(cur.i + 1) + '</span></div>' +
+      '<div><div class="eyebrow">SAVED</div><h2 class="title">記録を保存しました</h2><p class="mute" style="margin-top:4px">' + esc(ex.name) + '</p></div>';
+
+    // 自己ベスト（PR）更新演出
+    if (cur.newPR) {
+      h += '<div class="pr-banner">' +
+        '<div class="pr-title">★ NEW PERSONAL RECORD</div>' +
+        '<div style="font-size:16px;font-weight:700">' + esc(cur.newPR) + '</div>' +
+        '<div class="mute">自己ベストを更新しました！素晴らしい成長です。</div>' +
+        '</div>';
+    }
+
+    h += '<div class="goalbox"><div class="gb-row"><span class="gb-k">今回実績</span><span class="gb-v">' + esc(sum(last.sets, ex)) + '</span></div>' +
+      '<div class="gb-row hi"><span class="gb-k">次回目標</span><span class="gb-v">' + esc(sum(t.sets, ex)) + '</span></div>' +
+      (t.up ? '<p class="badge-blue">上限達成！次回は重量を上げてチャレンジします。</p>' : '<p class="mute">次回は同重量でさらなる回数アップを狙います。</p>') +
+      '</div>';
+    if (hasNext) h += '<button type="button" class="primary" data-act="next">次の種目へ（' + esc(m.ex[cur.i + 1].name) + '）</button>';
+    h += '<button type="button" class="ghost" data-act="list">種目一覧へ戻る</button></div>';
+    return h;
+  }
+
+  /* ---------- Growth Dashboard View ---------- */
+  function viewDash() {
+    var now = new Date();
+    var d0 = new Date(now);
+    var dow = (d0.getDay() + 6) % 7;
+    d0.setDate(d0.getDate() - dow);
+    var thisWeekStart = d0.getFullYear() + '-' + pad(d0.getMonth() + 1) + '-' + pad(d0.getDate());
+    var dPrev = new Date(d0); dPrev.setDate(dPrev.getDate() - 7);
+    var prevWeekStart = dPrev.getFullYear() + '-' + pad(dPrev.getMonth() + 1) + '-' + pad(dPrev.getDate());
+    var thisMonthPrefix = now.getFullYear() + '-' + pad(now.getMonth() + 1);
+
+    var thisWVol = 0, prevWVol = 0, thisWSets = 0, monthDays = {};
+    var partSets = { '胸': 0, '背中': 0, '肩': 0, '腕': 0, '脚': 0 };
+    var dayMap = {};
+
+    S.hist.forEach(function (h) {
+      if (!dayMap[h.date]) dayMap[h.date] = {};
+      dayMap[h.date][h.day] = 1;
+      if (h.date.indexOf(thisMonthPrefix) === 0) monthDays[h.date] = 1;
+
+      var vol = h.sets.reduce(function (a, s) { return a + ((Number(s.w) || 1) * (Number(s.r) || 0)); }, 0);
+      if (h.date >= thisWeekStart) {
+        thisWVol += vol;
+        thisWSets += h.sets.length;
+        var ex = findEx(h.id);
+        if (ex && partSets[ex.part] != null) partSets[ex.part] += h.sets.length;
+      } else if (h.date >= prevWeekStart && h.date < thisWeekStart) {
+        prevWVol += vol;
+      }
+    });
+
+    var growthPct = prevWVol > 0 ? Math.round(((thisWVol - prevWVol) / prevWVol) * 100) : (thisWVol > 0 ? 100 : 0);
+    var growthStr = (growthPct >= 0 ? '+' : '') + growthPct + '%';
+
+    var h = '<div class="wrap"><header class="brand"><div><div class="eyebrow">ANALYTICS</div><h1>成長ダッシュボード</h1></div></header>';
+
+    // 週・月 KPI
+    h += '<div class="kpi-grid">' +
+      '<div class="kpi"><b>' + Object.keys(monthDays).length + '日</b><span>今月の実施日数</span></div>' +
+      '<div class="kpi"><b>' + thisWSets + '</b><span>今週の総セット</span></div>' +
+      '<div class="kpi"><b class="blue">' + esc(growthStr) + '</b><span>先週比負荷成長</span></div>' +
+      '</div>';
+
+    // 筋肉別ボリューム分析（週間セット数）
+    var maxPartSets = Math.max(10, Math.max.apply(null, Object.keys(partSets).map(function (k) { return partSets[k]; })));
+    h += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline">' +
+      '<h3 style="font-size:15px;font-weight:600">筋肉別ボリューム（今週セット数）</h3><span class="mute">目安 10–15セット/週</span></div><div class="vol-list">';
+    ['胸', '背中', '肩', '腕', '脚'].forEach(function (p) {
+      var cnt = partSets[p];
+      var pct = Math.min(100, Math.round((cnt / maxPartSets) * 100));
+      h += '<div class="vol-item"><div class="vol-top"><span>' + p + '</span><span class="num" style="color:var(--blue);font-weight:600">' + cnt + ' sets</span></div>' +
+        '<div class="vol-bar"><i style="width:' + pct + '%"></i></div></div>';
+    });
+    h += '</div></div>';
+
+    // トレーニングカレンダー
+    var calDate = new Date(now.getFullYear(), now.getMonth() + (V.calOffset || 0), 1);
+    var cy = calDate.getFullYear(), cm = calDate.getMonth();
+    var firstDow = calDate.getDay();
+    var lastDayNum = new Date(cy, cm + 1, 0).getDate();
+    var tStr = today();
+
+    h += '<div class="card"><div class="cal-head">' +
+      '<button type="button" class="qbtn" data-act="calPrev">‹ 前月</button>' +
+      '<b style="font-family:var(--f-display);font-size:15px">' + cy + '年 ' + (cm + 1) + '月</b>' +
+      '<button type="button" class="qbtn" data-act="calNext">次月 ›</button></div>' +
+      '<div class="cal-grid">';
+    WD.forEach(function (w) { h += '<div class="cal-wd">' + w + '</div>'; });
+    for (var b = 0; b < firstDow; b++) h += '<div class="cal-d empty"></div>';
+    for (var d = 1; d <= lastDayNum; d++) {
+      var ds = cy + '-' + pad(cm + 1) + '-' + pad(d);
+      var info = dayMap[ds];
+      var cls = 'cal-d' + (ds === tStr ? ' today' : '');
+      if (info) {
+        if (info.A && info.B) cls += ' doneBoth';
+        else if (info.A) cls += ' doneA';
+        else cls += ' doneB';
+      }
+      h += '<div class="' + cls + '">' + d + '</div>';
+    }
+    h += '</div><div style="display:flex;gap:12px;font-size:11px;color:var(--mute);justify-content:flex-end">' +
+      '<span><i style="display:inline-block;width:8px;height:8px;background:#3b82f6;border-radius:2px;margin-right:4px"></i>A DAY</span>' +
+      '<span><i style="display:inline-block;width:8px;height:8px;background:#1d4ed8;border-radius:2px;margin-right:4px"></i>B DAY</span>' +
+      '</div></div>';
+
+    // 種目別 PR 一覧
+    h += '<div class="card"><h3 style="font-size:15px;font-weight:600">自己ベスト（PR）一覧</h3><div style="display:flex;flex-direction:column;gap:8px">';
+    ['A', 'B'].forEach(function (dk) {
+      MENU[dk].ex.forEach(function (ex) {
+        var pr = getExercisePR(ex.id);
+        if (pr) {
+          h += '<div style="display:flex;justify-content:space-between;font-size:13px;border-bottom:1px solid var(--line);padding-bottom:6px">' +
+            '<span>' + esc(ex.name) + '</span><span class="num" style="color:var(--blue);font-weight:600">' + esc(wl(pr.w, ex)) + ' × ' + pr.r + '回</span></div>';
+        }
+      });
+    });
+    if (!S.hist.length) h += '<p class="mute">トレーニングを記録するとPRが自動集計されます。</p>';
+    h += '</div></div></div>';
+    return h;
+  }
+
+  /* ---------- Body Metrics & Photos View ---------- */
+  function viewBody() {
+    var latest = S.body.length ? S.body[S.body.length - 1] : null;
+    var first = S.body.length > 1 ? S.body[0] : null;
+    var wDiff = (latest && first && latest.w && first.w) ? r2(latest.w - first.w) : null;
+
+    var h = '<div class="wrap"><header class="brand"><div><div class="eyebrow">BODY TRACKER</div><h1>身体の変化記録</h1></div></header>';
+
+    if (latest) {
+      h += '<div class="kpi-grid">' +
+        '<div class="kpi"><b class="blue">' + (latest.w ? latest.w + 'kg' : '-') + '</b><span>最新体重</span></div>' +
+        '<div class="kpi"><b>' + (latest.bf ? latest.bf + '%' : '-') + '</b><span>体脂肪率</span></div>' +
+        '<div class="kpi"><b>' + (wDiff !== null ? (wDiff >= 0 ? '+' : '') + wDiff + 'kg' : '-') + '</b><span>初回比変化</span></div>' +
+        '</div>';
+    }
+
+    // 入力フォーム
+    h += '<div class="card"><h3 style="font-size:15px;font-weight:600">今日の数値を記録</h3>' +
+      '<div class="body-grid">' +
+      '<div class="body-fld"><label>体重 (kg)</label><input type="number" id="bwIn" step="0.1" placeholder="68.5"></div>' +
+      '<div class="body-fld"><label>体脂肪 (%)</label><input type="number" id="bfIn" step="0.1" placeholder="15.0"></div>' +
+      '<div class="body-fld"><label>胸囲/腹囲 (cm)</label><input type="number" id="bmIn" step="0.1" placeholder="95.0"></div>' +
+      '</div>' +
+      '<button type="button" class="primary" data-act="saveBody">数値を保存</button></div>';
+
+    // 写真比較（ビフォー・アフター）
+    h += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center">' +
+      '<h3 style="font-size:15px;font-weight:600">体型写真の比較</h3>' +
+      '<label class="qbtn" style="cursor:pointer;border-color:var(--blue);color:var(--blue)">+ 写真を追加<input type="file" accept="image/*" id="photoIn" hidden></label></div>';
+
+    if (S.photos.length >= 2) {
+      var p1 = S.photos[0], p2 = S.photos[S.photos.length - 1];
+      h += '<div class="photo-row">' +
+        '<div class="photo-card"><img src="' + p1.data + '"><div class="photo-cap"><span>BEFORE</span><span>' + esc(p1.date) + '</span></div></div>' +
+        '<div class="photo-card"><img src="' + p2.data + '"><div class="photo-cap"><span style="color:var(--blue);font-weight:600">LATEST</span><span>' + esc(p2.date) + '</span></div></div>' +
+        '</div>';
+    } else if (S.photos.length === 1) {
+      var p0 = S.photos[0];
+      h += '<div class="photo-card"><img src="' + p0.data + '"><div class="photo-cap"><span>' + esc(p0.date) + '</span><button type="button" style="color:var(--err)" data-act="delPhoto" data-i="0">削除</button></div></div>' +
+        '<p class="mute">もう1枚追加すると、初回と最新の比較表示になります。</p>';
+    } else {
+      h += '<p class="mute">写真は自動圧縮されてiPhone内に安全に保存されます（外部送信されません）。</p>';
+    }
+    h += '</div>';
+
+    // 体重履歴リスト
+    if (S.body.length) {
+      h += '<div class="card"><h3 style="font-size:15px;font-weight:600">測定履歴</h3><div style="display:flex;flex-direction:column;gap:8px">';
+      S.body.slice().reverse().slice(0, 15).forEach(function (b) {
+        h += '<div style="display:flex;justify-content:space-between;font-size:13px;border-bottom:1px solid var(--line);padding-bottom:6px">' +
+          '<span class="mute">' + esc(b.date) + '</span>' +
+          '<span class="num">' + (b.w ? b.w + 'kg ' : '') + (b.bf ? '· ' + b.bf + '% ' : '') + (b.m ? '· ' + b.m + 'cm' : '') + '</span></div>';
+      });
+      h += '</div></div>';
+    }
+    return h + '</div>';
+  }
+
+  /* ---------- Log & Backup View ---------- */
+  function viewLog() {
+    var days = {}, order = [];
+    S.hist.forEach(function (x) {
+      if (!days[x.date]) { days[x.date] = []; order.push(x.date); }
+      days[x.date].push(x);
+    });
+    order.sort().reverse();
+
+    var h = '<div class="wrap"><header class="brand"><div><div class="eyebrow">HISTORY & BACKUP</div><h1>履歴・データ管理</h1></div></header>';
+
+    order.slice(0, 30).forEach(function (d) {
+      var items = days[d].slice().sort(function (a, b) { return a.ts - b.ts; });
+      var dayLabel = MENU[items[0].day] ? MENU[items[0].day].label : '';
+      h += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline">' +
+        '<b>' + esc(dateLabel(d)) + '</b><span class="eyebrow">' + esc(dayLabel) + '</span></div>';
+      items.forEach(function (x) {
+        var ex = findEx(x.id);
+        h += '<div style="font-size:13px;border-top:1px solid var(--line);padding-top:8px">' +
+          '<div style="font-weight:600">' + esc(x.name) + '</div>' +
+          '<div class="num mute">' + esc(sum(x.sets, ex)) + '</div></div>';
+      });
+      h += '</div>';
+    });
+    if (!order.length) h += '<p class="mute">まだトレーニング履歴がありません。</p>';
+
+    h += '<div class="card"><h3 style="font-size:15px;font-weight:600">バックアップ・復元</h3>' +
+      '<p class="mute">データはiPhone本体に保存されています。機種変更やキャッシュ削除に備え、定期的にコピーしてメモ帳等に保管してください。</p>' +
+      '<button type="button" class="ghost" data-act="copy">全データをクリップボードにコピー</button>' +
+      '<textarea id="bk" data-in="bk" placeholder="復元する場合はここにバックアップデータを貼り付け">' + esc(V.bk || '') + '</textarea>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+      '<button type="button" class="ghost' + (V.confirm === 'restore' ? ' danger' : '') + '" data-act="restore">' + (V.confirm === 'restore' ? '確定して上書き' : '貼り付けから復元') + '</button>' +
+      '<button type="button" class="ghost' + (V.confirm === 'wipe' ? ' danger' : '') + '" data-act="wipe">' + (V.confirm === 'wipe' ? '確定して全消去' : '全データ消去') + '</button>' +
+      '</div>' + (V.msg ? '<p style="color:var(--blue);font-size:12px">' + esc(V.msg) + '</p>' : '') + '</div></div>';
+    return h;
+  }
+
+  /* ---------- Render & Navigation ---------- */
+  var app = el('app');
+  function render(keep) {
+    var y = keep ? window.scrollY : 0;
+    app.innerHTML = V.name === 'home' ? viewHome()
+      : V.name === 'day' ? viewDay()
+      : V.name === 'ex' ? viewEx()
+      : V.name === 'dash' ? viewDash()
+      : V.name === 'body' ? viewBody()
+      : viewLog();
+    window.scrollTo(0, y);
+
+    ['home', 'dash', 'body', 'log'].forEach(function (n) {
+      var btn = el('nav-' + n);
+      if (btn) {
+        var active = (V.name === n) || ((V.name === 'day' || V.name === 'ex') && n === 'home');
+        btn.classList.toggle('active', active);
+      }
+    });
+  }
+
+  /* ---------- Exercise Actions ---------- */
+  function openEx(day, i) {
+    var ex = MENU[day].ex[i], t = computeTarget(ex), dr = S.draft[ex.id], sets;
+    if (dr && dr.date === today() && dr.sets && dr.sets.length) {
+      sets = dr.sets;
+    } else {
+      sets = t.sets.map(function (s) { return { w: s.w == null ? '' : s.w, r: s.r, done: false }; });
+    }
+    cur = { day: day, i: i, ex: ex, sets: sets, saved: false, err: '', newPR: null };
+    V = { name: 'ex', day: day, i: i };
+    render(false);
+  }
+  function persistDraft() {
+    if (!cur) return;
+    S.draft[cur.ex.id] = { date: today(), sets: cur.sets };
+    save();
+  }
+  function setWeight(i, val) {
+    cur.sets[i].w = val;
+    for (var j = i + 1; j < cur.sets.length; j++) {
+      if (!cur.sets[j].done) cur.sets[j].w = val;
+    }
+  }
+  function toggleDone(i) {
+    var s = cur.sets[i];
+    if (!s.done) {
+      if (s.w === '' || s.w == null || isNaN(Number(s.w))) { cur.err = 'SET ' + (i + 1) + ' の重量を入力してください。'; render(true); return; }
+      if (!(Number(s.r) > 0)) { cur.err = 'SET ' + (i + 1) + ' の回数を入力してください。'; render(true); return; }
+      s.done = true; cur.err = '';
+      if (cur.sets.some(function (x) { return !x.done; })) startTimer(cur.ex.rest); else stopTimer();
+    } else {
+      s.done = false;
+    }
+    persistDraft(); render(true);
+  }
+  function saveEx() {
+    var done = cur.sets.filter(function (s) { return s.done; }).map(function (s) { return { w: Number(s.w), r: Number(s.r) }; });
+    if (!done.length) return;
+    var d = today(), ex = cur.ex;
+
+    // PR判定
+    var oldPR = getExercisePR(ex.id);
+    var bestSet = null;
+    done.forEach(function (s) {
+      if (!bestSet || s.w > bestSet.w || (s.w === bestSet.w && s.r > bestSet.r)) bestSet = s;
+    });
+    if (bestSet && (!oldPR || bestSet.w > oldPR.w || (bestSet.w === oldPR.w && bestSet.r > oldPR.r))) {
+      cur.newPR = wl(bestSet.w, ex) + ' × ' + bestSet.r + '回';
+      beep();
+    }
+
+    S.last[ex.id] = { date: d, sets: done };
+    S.hist = S.hist.filter(function (h) { return !(h.date === d && h.id === ex.id); });
+    S.hist.push({ date: d, ts: Date.now(), day: cur.day, id: ex.id, name: ex.name, sets: done });
+    delete S.draft[ex.id];
+    save(); stopTimer(); cur.saved = true; render(false);
+  }
+
+  /* ---------- Event Delegation ---------- */
+  var H = {
+    day: function (b) { V = { name: 'day', day: b.dataset.d }; render(false); },
+    ex: function (b) { openEx(V.day, Number(b.dataset.i)); },
+    resume: function (b) {
+      var id = b.dataset.id;
+      ['A', 'B'].forEach(function (d) {
+        MENU[d].ex.forEach(function (e, idx) { if (e.id === id) openEx(d, idx); });
+      });
+    },
+    back: function () {
+      if (V.name === 'ex') V = { name: 'day', day: cur.day };
+      else V = { name: 'home' };
+      render(false);
+    },
+    qLast: function () {
+      var last = S.last[cur.ex.id];
+      if (!last) return;
+      cur.sets.forEach(function (s, i) {
+        var ls = last.sets[Math.min(i, last.sets.length - 1)];
+        s.w = ls.w; s.r = ls.r;
+      });
+      persistDraft(); render(true);
+    },
+    qAllW: function (b) {
+      var dir = Number(b.dataset.d), st = stepOf(cur.ex);
+      cur.sets.forEach(function (s) {
+        s.w = Math.max(0, r2((Number(s.w) || 0) + dir * st));
+      });
+      persistDraft(); render(true);
+    },
+    wm: function (b) { var i = Number(b.dataset.i); setWeight(i, Math.max(0, r2((Number(cur.sets[i].w) || 0) - stepOf(cur.ex)))); persistDraft(); render(true); },
+    wp: function (b) { var i = Number(b.dataset.i); setWeight(i, r2((Number(cur.sets[i].w) || 0) + stepOf(cur.ex))); persistDraft(); render(true); },
+    rm: function (b) { var i = Number(b.dataset.i); cur.sets[i].r = Math.max(0, (Number(cur.sets[i].r) || 0) - 1); persistDraft(); render(true); },
+    rp: function (b) { var i = Number(b.dataset.i); cur.sets[i].r = (Number(cur.sets[i].r) || 0) + 1; persistDraft(); render(true); },
+    done: function (b) { toggleDone(Number(b.dataset.i)); },
+    save: function () { saveEx(); },
+    next: function () { openEx(cur.day, cur.i + 1); },
+    list: function () { V = { name: 'day', day: cur.day }; render(false); },
+    calPrev: function () { V.calOffset = (V.calOffset || 0) - 1; render(true); },
+    calNext: function () { V.calOffset = (V.calOffset || 0) + 1; render(true); },
+    saveBody: function () {
+      var w = parseFloat(el('bwIn').value), bf = parseFloat(el('bfIn').value), m = parseFloat(el('bmIn').value);
+      if (isNaN(w) && isNaN(bf) && isNaN(m)) return;
+      var d = today();
+      S.body = S.body.filter(function (x) { return x.date !== d; });
+      S.body.push({ date: d, w: isNaN(w) ? null : w, bf: isNaN(bf) ? null : bf, m: isNaN(m) ? null : m });
+      S.body.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+      save(); render(true);
+    },
+    delPhoto: function (b) {
+      S.photos.splice(Number(b.dataset.i), 1); save(); render(true);
+    },
+    copy: function () {
+      var exportObj = Object.assign({}, S, { photos: [] }); // 写真は容量大のためテキストバックアップから除外
+      var json = JSON.stringify(exportObj);
+      V.bk = json; V.msg = 'バックアップデータをコピーしました。メモ帳等に貼り付けてください。';
+      try { navigator.clipboard.writeText(json); } catch (e) {}
+      render(true);
+    },
+    restore: function () {
+      if (V.confirm !== 'restore') { V.confirm = 'restore'; render(true); return; }
+      try {
+        var o = JSON.parse((V.bk || '').trim());
+        if (!o || !Array.isArray(o.hist)) throw new Error();
+        S = Object.assign(blank(), o); save();
+        V.msg = '復元が完了しました（' + S.hist.length + '件）。';
+      } catch (e) { V.msg = 'データの形式が正しくありません。'; }
+      V.confirm = ''; render(true);
+    },
+    wipe: function () {
+      if (V.confirm !== 'wipe') { V.confirm = 'wipe'; render(true); return; }
+      S = blank(); save(); stopTimer();
+      V.confirm = ''; V.bk = ''; V.msg = 'すべてのデータを消去しました。'; render(true);
+    }
+  };
+
+  app.addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-act]') : null;
+    if (!b || b.disabled) return;
+    ensureAudio();
+    if (H[b.dataset.act]) H[b.dataset.act](b);
+  });
+
+  document.querySelector('.nav').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-nav]') : null;
+    if (!b) return;
+    ensureAudio();
+    V = { name: b.dataset.nav, calOffset: 0 };
+    render(false);
+  });
+
+  app.addEventListener('input', function (e) {
+    var t = e.target;
+    if (!t.dataset || !t.dataset.in) return;
+    if (t.dataset.in === 'bk') { V.bk = t.value; return; }
+    if (!cur) return;
+    if (t.dataset.in === 'memo') { S.memos[cur.ex.id] = t.value; save(); return; }
+    var i = Number(t.dataset.i), v = t.value === '' ? '' : parseFloat(t.value);
+    if (t.dataset.in === 'w') setWeight(i, isNaN(v) ? '' : v);
+    else cur.sets[i].r = isNaN(v) ? '' : v;
+    persistDraft();
+  });
+
+  app.addEventListener('change', function (e) {
+    var t = e.target;
+    if (t.id === 'stepIn' && cur) {
+      var v = parseFloat(t.value);
+      if (v > 0) { S.steps[cur.ex.id] = v; save(); }
+    }
+    if (t.id === 'photoIn' && t.files && t.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var img = new Image();
+        img.onload = function () {
+          var cvs = document.createElement('canvas');
+          var maxW = 600, scale = Math.min(1, maxW / img.width);
+          cvs.width = img.width * scale; cvs.height = img.height * scale;
+          cvs.getContext('2d').drawImage(img, 0, 0, cvs.width, cvs.height);
+          var dataUrl = cvs.toDataURL('image/jpeg', 0.72);
+          S.photos.push({ date: today(), data: dataUrl });
+          if (S.photos.length > 10) S.photos.shift();
+          save(); render(true);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(t.files[0]);
+    }
+  });
+
+  el('timer').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('[data-t]') : null;
+    if (!b) return;
+    ensureAudio();
+    if (b.dataset.t === 'skip') stopTimer();
+    else adjustTimer(Number(b.dataset.t) * 1000);
+  });
+
+  render(false);
+})();
+</script>
+</body>
+</html>
