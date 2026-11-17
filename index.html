@@ -213,6 +213,22 @@ textarea { width: 100%; min-height: 96px; background: var(--surface); border: 1p
 .form .chkrow { display: flex; align-items: center; gap: 10px; font-size: 14px; min-height: 44px; }
 .form .chkrow input { width: 22px; height: 22px; accent-color: #f4f4f2; }
 
+/* calendar */
+.calhd, .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.calhd span { text-align: center; font-size: 11px; color: var(--mute); letter-spacing: .08em; }
+.cd { aspect-ratio: 1; min-width: 0; border: 1px solid var(--line); border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; font-family: var(--f-display); font-size: 14px; font-variant-numeric: tabular-nums; text-align: center; background: var(--surface); }
+.cd i { font-style: normal; font-size: 9px; letter-spacing: .06em; height: 11px; line-height: 11px; }
+.cd.a { background: var(--fg); color: var(--on-fg); border-color: var(--fg); font-weight: 600; }
+.cd.b { border: 2px solid var(--fg); font-weight: 600; }
+.cd.today { outline: 1px dashed var(--mute); outline-offset: 2px; }
+.cd.sel { outline: 2px solid var(--up); outline-offset: 2px; }
+.cd.pad { border-color: transparent; background: none; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--mute); align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); }
+.legend .la { background: var(--fg); border-color: var(--fg); }
+.legend .lb { border: 2px solid var(--fg); }
+
 /* timer */
 .timer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--surface-2); border-top: 1px solid var(--line);
   padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
@@ -619,7 +635,10 @@ textarea { width: 100%; min-height: 96px; background: var(--surface); border: 1p
         '<span class="dc-meta">' + S.menu[d].length + '種目 · ' + (ld ? '前回 ' + esc(ld) : '未実施') + '</span></span>' +
         (nd === d ? '<span class="tag">NEXT</span>' : '<span></span>') + '</button>';
     });
+    var ym = t.slice(0, 7), monthDaysN = {};
+    S.hist.forEach(function (x) { if (x.date.slice(0, 7) === ym) monthDaysN[x.date] = 1; });
     h += '</div><div class="rows">' +
+      rowBtn('cal', 'カレンダー', '今月 ' + Object.keys(monthDaysN).length + '日実施 · トレーニングした日を確認') +
       rowBtn('week', '週次の振り返り', '前回比・伸びている種目・停滞している種目') +
       rowBtn('trends', 'RM推移', '種目ごとの推定1RMをグラフで確認') +
       rowBtn('edit', '種目の編集', '入れ替え・セット数・回数・休憩') +
@@ -935,12 +954,54 @@ textarea { width: 100%; min-height: 96px; background: var(--surface); border: 1p
     return h;
   }
 
+  /* ---------- views: calendar ---------- */
+  function ymShift(ym, n) {
+    var p = ym.split('-'), d = new Date(Number(p[0]), Number(p[1]) - 1 + n, 1);
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1);
+  }
+  function viewCal() {
+    var ym = V.ym, p = ym.split('-'), y = Number(p[0]), m = Number(p[1]), t = today();
+    var by = {}, na = 0, nb = 0, nd = 0;
+    S.hist.forEach(function (x) {
+      if (x.date.slice(0, 7) !== ym) return;
+      var o = by[x.date] || (by[x.date] = { A: false, B: false, items: [] });
+      o[x.day] = true; o.items.push(x);
+    });
+    Object.keys(by).forEach(function (d) { nd++; if (by[d].A) na++; if (by[d].B) nb++; });
+    var dim = new Date(y, m, 0).getDate(), dow = new Date(y, m - 1, 1).getDay();
+    var h = '<div class="wrap"><div class="topbar"><button type="button" class="back" data-act="back">‹ ホーム</button></div>' +
+      '<div><div class="eyebrow">Calendar</div><h2 class="title">カレンダー</h2></div>' +
+      '<div class="wknav"><button type="button" data-act="calprev" aria-label="前の月">‹</button><span>' + y + '年' + m + '月</span>' +
+      '<button type="button" data-act="calnext" aria-label="次の月"' + (ym >= t.slice(0, 7) ? ' disabled' : '') + '>›</button></div>' +
+      '<div class="stats" style="grid-template-columns:repeat(3,1fr)"><div><b>' + nd + '</b><span>実施日数</span></div><div><b>' + na + '</b><span>A DAY</span></div><div><b>' + nb + '</b><span>B DAY</span></div></div>' +
+      '<div class="calhd">' + WD.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div><div class="cal">';
+    for (var i = 0; i < dow; i++) h += '<span class="cd pad"></span>';
+    for (var d = 1; d <= dim; d++) {
+      var date = ym + '-' + pad(d), o = by[date];
+      var cls = 'cd' + (o && o.A ? ' a' : '') + (o && o.B && !o.A ? ' b' : '') + (date === t ? ' today' : '') + (V.sel === date ? ' sel' : '');
+      var lt = o ? (o.A ? 'A' : '') + (o.B ? 'B' : '') : '';
+      h += '<button type="button" class="' + cls + '" data-act="calsel" data-d="' + date + '" aria-label="' + date + (o ? ' ' + lt + ' DAY実施' : '') + '"><span>' + d + '</span><i>' + lt + '</i></button>';
+    }
+    h += '</div><div class="legend"><span><i class="la"></i>A DAY</span><span><i class="lb"></i>B DAY</span><span>破線 = 今日</span></div>';
+    if (V.sel && V.sel.slice(0, 7) === ym) {
+      var o2 = by[V.sel];
+      h += '<section class="sec"><h3 class="h3">' + esc(dateLabel(V.sel)) + '</h3>';
+      if (!o2) h += '<p class="mute">この日の記録はありません。</p>';
+      else o2.items.slice().sort(function (a, b) { return a.ts - b.ts; }).forEach(function (x) {
+        var pr = x.pr && (x.pr.e || x.pr.w) ? '<span class="prt">PR</span>' : '';
+        h += '<div class="h-it"><b>' + esc(x.name) + pr + '</b><span>' + esc(sum(x.sets, exOf(x))) + '</span></div>';
+      });
+      h += '</section>';
+    } else h += '<p class="mute">日付を押すと、その日の記録が表示されます。</p>';
+    return h + '</div>';
+  }
+
   var app = el('app');
   function render(keep) {
     var y = keep ? window.scrollY : 0;
     var n = V.name;
     app.innerHTML = n === 'home' ? viewHome() : n === 'day' ? viewDay() : n === 'ex' ? viewEx() : n === 'trends' ? viewTrends() :
-      n === 'trend' ? viewTrend() : n === 'week' ? viewWeek() : n === 'edit' ? viewEdit() : n === 'form' ? viewForm() : viewLog();
+      n === 'trend' ? viewTrend() : n === 'week' ? viewWeek() : n === 'edit' ? viewEdit() : n === 'form' ? viewForm() : n === 'cal' ? viewCal() : viewLog();
     window.scrollTo(0, y);
   }
 
@@ -1029,6 +1090,10 @@ textarea { width: 100%; min-height: 96px; background: var(--surface); border: 1p
       render(false);
     },
     log: function () { V = { name: 'log', msg: '', bk: '', confirm: '' }; render(false); },
+    cal: function () { V = { name: 'cal', ym: today().slice(0, 7), sel: null }; render(false); },
+    calprev: function () { V.ym = ymShift(V.ym, -1); V.sel = null; render(false); },
+    calnext: function () { if (V.ym < today().slice(0, 7)) { V.ym = ymShift(V.ym, 1); V.sel = null; render(false); } },
+    calsel: function (b) { V.sel = b.dataset.d; render(true); },
     week: function () { V = { name: 'week', off: 0 }; render(false); },
     wprev: function () { V.off -= 1; render(false); },
     wnext: function () { if (V.off < 0) { V.off += 1; render(false); } },
