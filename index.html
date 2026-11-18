@@ -245,6 +245,29 @@ textarea { width: 100%; min-height: 96px; background: var(--surface); border: 1p
 .timer.end .tm-time, .timer.end .tm-label { color: var(--up); }
 .timer.end .tm-bar i { background: var(--up); }
 @media (prefers-reduced-motion: no-preference) { .tm-bar i { transition: width .25s linear; } }
+
+/* ===== Premium mobile refresh ===== */
+.bottom-nav{position:fixed;z-index:30;left:0;right:0;bottom:0;padding:8px max(12px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px));display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:rgba(12,14,18,.94);border-top:1px solid rgba(255,255,255,.07);backdrop-filter:blur(24px)}.bottom-nav button{min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#697486;font-family:var(--f-display);font-size:9px;letter-spacing:.08em}.bottom-nav button.active{color:#80aaff}.nav-ico{font-size:19px;line-height:1.1;font-family:system-ui;font-weight:300}
+
+:root{--bg:#090a0d;--surface:#151820;--surface-2:#1d222c;--line:rgba(255,255,255,.075);--fg:#f5f6f8;--mute:#9299a6;--dim:#5d6572;--ok:#65d6a1;--up:#6395f5;--err:#f17f88;--on-fg:#090a0d}
+body{padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:calc(100px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse at 80% -10%,rgba(99,149,245,.10),transparent 40%),var(--bg)}
+.wrap{gap:24px;max-width:520px}
+.brand{gap:10px;padding-top:10px}.brand h1{font-size:36px;font-weight:500;letter-spacing:-.045em}.brand .sub{font-size:13px;color:#788293}
+.eyebrow{font-size:10px;letter-spacing:.2em;color:#7c8ba3}.lead{letter-spacing:.04em;font-size:13px;color:#a5adbb}
+.daycard{border:1px solid var(--line);background:linear-gradient(135deg,#181d27,#12151b);border-radius:18px;padding:20px;gap:18px;box-shadow:0 12px 28px rgba(0,0,0,.16);transition:transform .18s,border-color .18s}
+.daycard:active{transform:scale(.985);border-color:rgba(99,149,245,.35)}.letter{font-size:64px;font-weight:500;letter-spacing:-.07em;color:#e9edf5}.dc-body{gap:6px}.dc-sub{font-size:15px;font-weight:600}.dc-meta{font-size:11px;line-height:1.5;color:#929baa}.tag{border:0;background:rgba(99,149,245,.14);color:#82aaff;border-radius:999px;padding:5px 9px;font-size:9px}
+.rows{gap:6px}.row{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:14px 16px;min-height:64px}.row:active{background:var(--surface-2)}.rw b{font-size:14px}.rw .mute{font-size:11px}.chev{font-size:22px;color:#65728a}
+.topbar{min-height:48px}.back{padding:0 14px 0 0;color:#9ba7ba}.title{font-size:28px;font-weight:500;letter-spacing:-.04em}.h3{font-size:15px;font-weight:600}.progress{gap:10px}.progress .bar{height:4px;border-radius:9px;overflow:hidden;background:#252b35}.progress .bar i{background:var(--up);border-radius:9px}
+.exlist{gap:7px}.ex{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:15px 13px;grid-template-columns:28px 1fr auto;gap:10px}.exlist .ex:last-child{border-bottom:1px solid var(--line)}.ex .no{color:#718096}.ex-n{font-size:14px;font-weight:600}.ex-m,.ex-l{font-size:11px}.ex.ok{border-color:rgba(101,214,161,.22);background:linear-gradient(135deg,rgba(101,214,161,.055),var(--surface))}.ex.ok .st{color:var(--ok)}
+.facts{border:0;gap:7px}.facts>div{border:0;background:var(--surface);border-radius:12px;padding:12px 14px;grid-template-columns:50px 1fr;font-size:13px}.facts dt{color:#8793a4}.goalbox,.recbox,.wcard{border:1px solid var(--line);background:linear-gradient(145deg,#191e28,#13161c);border-radius:16px;padding:16px;gap:12px}.gb-row{grid-template-columns:58px 1fr;gap:10px;font-size:13px}.gb-k{font-size:10px;color:#8994a5}.gb-v{font-size:14px;line-height:1.65}.goalbox .hi .gb-v{color:#a9c4ff;font-weight:600}.badge{color:#8bb0ff;font-size:12px}
+.sets{gap:10px}.set{border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:14px;gap:12px}.set.done{border-color:rgba(101,214,161,.5);background:linear-gradient(145deg,rgba(101,214,161,.08),var(--surface))}.chk{border:0;background:#252c38;border-radius:10px;min-width:92px;height:40px;font-size:12px}.set.done .chk{background:var(--ok);color:#09110d}.set-b{gap:10px}.stp{grid-template-columns:42px minmax(0,1fr) 42px;gap:5px}.stp button{border:0;background:#242a34;border-radius:11px;height:46px;color:#aeb9ca}.stp input{height:46px;border-radius:11px;background:#101319;font-size:24px}.primary{border-radius:14px;min-height:54px;background:linear-gradient(135deg,#78a4ff,#5085eb);color:#07101f;box-shadow:0 8px 24px rgba(76,126,229,.18)}.ghost{border:1px solid var(--line);background:var(--surface);border-radius:13px;min-height:50px}.ghost.danger{border-color:var(--err)}textarea,.form input[type=text],.form input[type=number]{border:1px solid var(--line);border-radius:12px;background:#101319}.fld label{font-size:10px;color:#8e9aac;letter-spacing:.07em}.memo{border-radius:12px}
+.sec{gap:12px}.sec-h{align-items:center}.recbox{gap:8px}.gr .gl{stroke:rgba(255,255,255,.08)}.gr .ln,.spark .ln{stroke:var(--up)}.gr .dp{fill:var(--ok)}.gr .lv{fill:#a9c4ff}.trow{padding:14px 10px;border-color:var(--line)}.t-n{font-size:14px}.t-m{font-size:11px}.stats{border:0;gap:8px}.stats>div{padding:13px;background:var(--surface);border:1px solid var(--line);border-radius:13px}.stats>div+div{padding-left:13px;border:1px solid var(--line)}.stats b{font-size:25px;font-weight:500;color:#edf2fb}.stats span{font-size:10px}.wknav{border:0;background:var(--surface);border-radius:13px;overflow:hidden}.wknav span{font-size:12px}.wcard{padding:14px}.wc-h b{font-size:14px}.chip{border-radius:999px;padding:2px 9px}.tbl th{border-color:var(--line)}.tbl td{border-color:var(--line)}
+.calhd,.cal{gap:5px}.cd{border:0;border-radius:9px;background:#161a21;font-size:13px}.cd.a{background:var(--up);color:#07101f}.cd.b{border:1px solid var(--up);color:#9dbaff;background:rgba(99,149,245,.08)}.cd.today{outline-color:#8e9aac}.legend i{border-radius:4px}.day-g{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface)}.bk{gap:12px}
+.timer{background:rgba(20,24,31,.96);border-top:1px solid var(--line);backdrop-filter:blur(20px);padding-top:12px}.tm-in{gap:10px}.tm-time{font-size:42px;font-weight:500;letter-spacing:-.04em}.tm-btns button{border:1px solid var(--line);border-radius:10px;background:#252b35}.tm-btns .solid{background:var(--up);color:#08111f;border-color:var(--up)}.tm-bar{border-radius:10px;background:#2a303b}.tm-bar i{background:var(--up);border-radius:10px}.timer.end .tm-time,.timer.end .tm-label{color:var(--ok)}
+button,input,textarea{-webkit-tap-highlight-color:transparent}button{transition:background .15s,transform .15s,border-color .15s}button:active{transform:scale(.985)}
+@media(max-width:380px){.daycard{padding:16px;gap:13px}.letter{font-size:58px}.dc-sub{font-size:14px}.stats b{font-size:22px}.set{padding:12px}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+
 </style>
 </head>
 <body>
@@ -624,8 +647,12 @@ textarea { width: 100%; min-height: 96px; background: var(--surface); border: 1p
   }
   function viewHome() {
     var nd = nextDay(), t = today();
+    var week = weekStart(t), weekHist = S.hist.filter(function(x){ return x.date >= week && x.date <= t; }), weekDates = {}, weekSets = 0, weekVolume = 0, weekPR = 0;
+    weekHist.forEach(function(x){ weekDates[x.date] = 1; weekSets += x.sets.length; x.sets.forEach(function(q){ weekVolume += (Number(q.w)||0)*(Number(q.r)||0); }); if(x.pr && (x.pr.e||x.pr.w)) weekPR++; });
     var h = '<div class="wrap"><header class="brand"><div class="eyebrow">Personal Workout System</div>' +
       '<h1>TRAINING LOG</h1><div class="sub">' + esc(dateLabel(t)) + '</div></header>' +
+      '<section class="stats" style="grid-template-columns:repeat(3,1fr)"><div><b>' + Object.keys(weekDates).length + '</b><span>今週の実施日</span></div><div><b>' + weekSets + '</b><span>総セット</span></div><div><b>' + weekPR + '</b><span>PR更新</span></div></section>' +
+      '<div class="goalbox"><div class="gb-row hi"><span class="gb-k">今週のVolume</span><span class="gb-v\ num">' + Math.round(weekVolume).toLocaleString('ja-JP') + ' kg</span></div><p class="mute">記録されたセットから集計 · ' + weekHist.length + '種目記録</p></div>' +
       '<p class="lead">トレーニング日を選択</p><div class="days">';
     ['A', 'B'].forEach(function (d) {
       var ld = lastDate(d);
@@ -996,12 +1023,25 @@ textarea { width: 100%; min-height: 96px; background: var(--surface); border: 1p
     return h + '</div>';
   }
 
+  function navMarkup() {
+    if (V.name === 'ex' || V.name === 'form') return '';
+    var active = '';
+    if (V.name === 'home') active = 'home';
+    else if (V.name === 'day') active = 'workout';
+    else if (V.name === 'week' || V.name === 'trends' || V.name === 'trend') active = 'progress';
+    else if (V.name === 'edit' || V.name === 'log' || V.name === 'cal') active = 'profile';
+    return '<nav class="bottom-nav" aria-label="Main navigation">' +
+      '<button type="button" data-act="navHome" class="' + (active === 'home' ? 'active' : '') + '"><span class="nav-ico">⌂</span><span>HOME</span></button>' +
+      '<button type="button" data-act="navWorkout" class="' + (active === 'workout' ? 'active' : '') + '"><span class="nav-ico">＋</span><span>WORKOUT</span></button>' +
+      '<button type="button" data-act="navProgress" class="' + (active === 'progress' ? 'active' : '') + '"><span class="nav-ico">↗</span><span>PROGRESS</span></button>' +
+      '<button type="button" data-act="navProfile" class="' + (active === 'profile' ? 'active' : '') + '"><span class="nav-ico">○</span><span>PROFILE</span></button></nav>';
+  }
   var app = el('app');
   function render(keep) {
     var y = keep ? window.scrollY : 0;
     var n = V.name;
-    app.innerHTML = n === 'home' ? viewHome() : n === 'day' ? viewDay() : n === 'ex' ? viewEx() : n === 'trends' ? viewTrends() :
-      n === 'trend' ? viewTrend() : n === 'week' ? viewWeek() : n === 'edit' ? viewEdit() : n === 'form' ? viewForm() : n === 'cal' ? viewCal() : viewLog();
+    app.innerHTML = (n === 'home' ? viewHome() : n === 'day' ? viewDay() : n === 'ex' ? viewEx() : n === 'trends' ? viewTrends() :
+      n === 'trend' ? viewTrend() : n === 'week' ? viewWeek() : n === 'edit' ? viewEdit() : n === 'form' ? viewForm() : n === 'cal' ? viewCal() : viewLog()) + navMarkup();
     window.scrollTo(0, y);
   }
 
@@ -1080,6 +1120,10 @@ textarea { width: 100%; min-height: 96px; background: var(--surface); border: 1p
 
   /* ---------- events ---------- */
   var H = {
+    navHome: function () { V = { name: 'home' }; render(false); },
+    navWorkout: function () { V = { name: 'day', day: nextDay() }; render(false); },
+    navProgress: function () { V = { name: 'week', off: 0 }; render(false); },
+    navProfile: function () { V = { name: 'edit', msg: '', confirm: '' }; render(false); },
     day: function (b) { V = { name: 'day', day: b.dataset.d }; render(false); },
     ex: function (b) { openEx(V.day, Number(b.dataset.i)); },
     back: function () {
