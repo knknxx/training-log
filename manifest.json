@@ -1,0 +1,18 @@
+{
+  "name": "TRAINING LOG",
+  "short_name": "TRAINING",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0a0b",
+  "theme_color": "#0a0a0b",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "IMG_9058.jpeg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
